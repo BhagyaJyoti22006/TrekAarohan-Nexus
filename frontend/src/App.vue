@@ -1,20 +1,31 @@
 <template>
-  <div>
-    <h1>Welcome to TrekAarohan-Nexus (TAN)</h1>
-    <p>The Vue.js frontend is successfully running!</p>
+  <div style="display: flex; flex-direction: column; min-height: 100vh;">
+    <Navbar />
+    
+    <div class="public-content" style="flex-grow: 1; background: white; padding: 0;">
+      <!-- Router View will render the matched component here -->
+      <router-view></router-view>
+      
+      <!-- Placeholder Home -->
+      <div style="padding: 3rem; text-align: center;" v-if="$route.path === '/'">
+        <h1>Welcome to TrekAarohan-Nexus</h1>
+        <p>The Vue.js frontend is successfully running!</p>
+      </div>
+    </div>
+    
+    <Footer />
   </div>
 </template>
 
 <script>
+import Navbar from "./components/Navbar.vue"
+import Footer from "./components/Footer.vue"
+
 export default {
-  name: 'App'
+  name: "App",
+  components: {
+    Navbar,
+    Footer
+  }
 }
 </script>
-
-<style>
-body {
-  font-family: Arial, sans-serif;
-  text-align: center;
-  margin-top: 50px;
-}
-</style>
