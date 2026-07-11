@@ -8,17 +8,17 @@
       <router-link to="/treks">Browse Treks</router-link>
       <router-link to="/about">About Us</router-link>
       
-      <!-- Dummy authentication -->
-      <template v-if="isAuthenticated">
-        <template v-if="userRole === 'admin'">
+      <template v-if="authStore.isAuthenticated">
+        <template v-if="authStore.userRole === 'admin'">
           <router-link to="/admin" class="btn btn-outline" style="margin-left: 2rem; padding: 0.4rem 1rem;">Dashboard</router-link>
         </template>
-        <template v-else-if="userRole === 'staff'">
+        <template v-else-if="authStore.userRole === 'staff'">
           <router-link to="/staff" class="btn btn-outline" style="margin-left: 2rem; padding: 0.4rem 1rem;">Dashboard</router-link>
         </template>
         <template v-else>
           <router-link to="/trekker" class="btn btn-outline" style="margin-left: 2rem; padding: 0.4rem 1rem;">Dashboard</router-link>
         </template>
+        <button @click="logout" class="btn btn-accent" style="margin-left: 1rem; padding: 0.4rem 1rem; cursor: pointer;">Logout</button>
       </template>
       <template v-else>
         <router-link to="/login" class="btn btn-outline" style="margin-left: 2rem; padding: 0.4rem 1rem;">Login</router-link>
@@ -29,13 +29,19 @@
 </template>
 
 <script>
+import { authStore } from "../store"
+
 export default {
   name: "Navbar",
   data() {
     return {
-      // Hardcoded auth values
-      isAuthenticated: false,
-      userRole: "trekker" 
+      authStore
+    }
+  },
+  methods: {
+    logout() {
+      authStore.logout()
+      this.$router.push("/login")
     }
   }
 }

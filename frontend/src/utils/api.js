@@ -1,0 +1,33 @@
+import { authStore } from "../store"
+
+const BASE_URL = "http://127.0.0.1:5000/api"
+
+export async function apiFetch(endpoint, options = {}) {
+  const headers = {
+    "Content-Type": "application/json",
+    ...options.headers
+  }
+  
+  if (authStore.isAuthenticated) {
+    headers["Authorization"] = `Bearer ${authStore.token}`
+  }
+  
+  const response = await fetch(`${BASE_URL}${endpoint}`, {
+    ...options,
+    headers
+  })
+  
+  if (response.status === 401 && endpoint !== "/auth/login") {
+    authStore.logout()
+    window.location.href = "/login"
+    throw new Error("Session expired. Please log in again.")
+  }
+  
+  const data = await response.json()
+  
+  if (!response.ok) {
+    throw new Error(data.error || "An error occurred")
+  }
+  
+  return data
+}
