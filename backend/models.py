@@ -19,8 +19,7 @@ class User(db.Model):
     emergency_phone = db.Column(db.String(20), nullable=True)
     emergency_relation = db.Column(db.String(50), nullable=True)
     experience = db.Column(db.Text, nullable=True)  # Used for Staff
-    # Flags
-    is_approved = db.Column(db.Boolean, default=False)  # Used for Staff
+    # Blacklist flag to restrict rogue users
     is_blacklisted = db.Column(db.Boolean, default=False)
     # Relationships
     assigned_treks = db.relationship("Trek", backref="staff", lazy=True)

@@ -34,8 +34,7 @@ def register():
         name=name,
         email=email,
         phone=phone,
-        role=0,
-        is_approved=True
+        role=0
     )
     
     db.session.add(new_user)
@@ -58,11 +57,8 @@ def login():
     if not user or not check_password_hash(user.password, password):
         return jsonify({"error": "Invalid username or password"}), 401
     
-    if user.role == 1 and not user.is_approved:
-        return jsonify({"error": "Staff account pending admin approval"}), 403
-    
     # Generate token containing user identity and role
-    access_token = create_access_token(identity=user.id, additional_claims={"role": user.role})
+    access_token = create_access_token(identity=str(user.id), additional_claims={"role": user.role})
     
     return jsonify({
         "message": "Login successful",

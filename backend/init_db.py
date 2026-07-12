@@ -17,7 +17,6 @@ with app.app_context():
             name="System Administrator",
             email="admin@tac.com",
             phone="0000000000",
-            is_approved=True,
             is_blacklisted=False,
         )
         db.session.add(admin_user)

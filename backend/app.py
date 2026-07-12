@@ -2,7 +2,6 @@ from flask import Flask, jsonify
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
 from models import db
-from routes.auth import auth_bp
 
 def create_app():
     app = Flask(__name__)
@@ -20,7 +19,8 @@ def create_app():
     
     jwt = JWTManager(app)
     
-    # Register Blueprint
+    # Register Blueprints
+    from routes.auth import auth_bp
     app.register_blueprint(auth_bp, url_prefix="/api/auth")
     
     # Ping Route
