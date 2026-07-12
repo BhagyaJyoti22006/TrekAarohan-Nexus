@@ -227,6 +227,9 @@ def get_trek(trek_id):
         return jsonify({"error": "Admin access required"}), 403
     
     trek = Trek.query.get_or_404(trek_id)
+    staff = trek.staff
+    staff_completed_treks = Trek.query.filter_by(assigned_staff_id=staff.id, status='completed').count() if staff else 0
+    
     return jsonify({
         "id": trek.id,
         "name": trek.name,
@@ -234,12 +237,16 @@ def get_trek(trek_id):
         "description": trek.description,
         "start_date": trek.start_date.isoformat(),
         "end_date": trek.end_date.isoformat(),
+        "duration": (trek.end_date - trek.start_date).days + 1,
         "difficulty": trek.difficulty,
         "status": trek.status,
         "slots_available": trek.slots_available,
         "price": trek.price,
         "cover_image": trek.cover_image,
-        "assigned_staff_id": trek.assigned_staff_id
+        "assigned_staff_id": trek.assigned_staff_id,
+        "staff_name": staff.name if staff else "Unassigned",
+        "staff_experience": staff.experience if staff else "",
+        "staff_completed_treks": staff_completed_treks
     }), 200
 
 

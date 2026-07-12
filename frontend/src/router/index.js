@@ -3,6 +3,7 @@ import { authStore } from "../store"
 
 import Login from "../views/Login.vue"
 import Register from "../views/Register.vue"
+import TrekDetail from "../views/TrekDetail.vue"
 
 import AdminLayout from "../views/admin/AdminLayout.vue"
 import AdminDashboard from "../views/admin/AdminDashboard.vue"
@@ -19,6 +20,7 @@ import TrekkerDashboard from "../views/TrekkerDashboard.vue"
 const routes = [
   { path: "/login", component: Login, meta: { requiresGuest: true } },
   { path: "/register", component: Register, meta: { requiresGuest: true } },
+  { path: "/trek/:id", component: TrekDetail },
   { 
     path: "/admin", 
     component: AdminLayout, 

@@ -41,7 +41,7 @@
               <router-link :to="'/admin/treks/' + trek.id + '/edit'" class="btn" :class="['completed', 'cancelled'].includes(trek.status) ? 'btn-secondary' : 'btn-primary'" style="padding: 0.25rem 0.5rem; font-size: 0.8rem; margin-right: 0.5rem;">
                 {{ ['completed', 'cancelled'].includes(trek.status) ? 'View' : 'Edit' }}
               </router-link>
-              <button class="btn btn-secondary" style="padding: 0.25rem 0.5rem; font-size: 0.8rem;" disabled>Show</button>
+              <router-link :to="'/trek/' + trek.id" class="btn btn-secondary" style="padding: 0.25rem 0.5rem; font-size: 0.8rem;">Show</router-link>
             </td>
           </tr>
           <tr v-if="treks.length === 0 && !loading">

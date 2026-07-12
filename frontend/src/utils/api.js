@@ -1,6 +1,7 @@
 import { authStore } from "../store"
 
-const BASE_URL = "http://127.0.0.1:5000/api"
+export const SERVER_URL = "http://127.0.0.1:5000"
+export const BASE_URL = `${SERVER_URL}/api`
 
 export async function apiFetch(endpoint, options = {}) {
   const headers = {
