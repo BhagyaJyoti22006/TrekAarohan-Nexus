@@ -4,6 +4,7 @@ import { authStore } from "../store"
 import Home from "../views/Home.vue"
 import PublicTreks from "../views/PublicTreks.vue"
 import PublicAbout from "../views/PublicAbout.vue"
+import PublicFooter from "../views/PublicFooter.vue"
 import TrekDetail from "../views/TrekDetail.vue"
 import Login from "../views/Login.vue"
 import Register from "../views/Register.vue"
@@ -24,6 +25,7 @@ const routes = [
   { path: "/", component: Home },
   { path: "/treks", component: PublicTreks },
   { path: "/about", component: PublicAbout },
+  { path: "/footer", component: PublicFooter },
   { path: "/trek/:id", component: TrekDetail },
   { path: "/login", component: Login, meta: { requiresGuest: true } },
   { path: "/register", component: Register, meta: { requiresGuest: true } },
