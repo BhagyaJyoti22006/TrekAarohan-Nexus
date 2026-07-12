@@ -18,7 +18,6 @@
         <template v-else>
           <router-link to="/trekker" class="btn btn-outline" style="margin-left: 2rem; padding: 0.4rem 1rem;">Dashboard</router-link>
         </template>
-        <button @click="logout" class="btn btn-accent" style="margin-left: 1rem; padding: 0.4rem 1rem; cursor: pointer;">Logout</button>
       </template>
       <template v-else>
         <router-link to="/login" class="btn btn-outline" style="margin-left: 2rem; padding: 0.4rem 1rem;">Login</router-link>
@@ -36,12 +35,6 @@ export default {
   data() {
     return {
       authStore
-    }
-  },
-  methods: {
-    logout() {
-      authStore.logout()
-      this.$router.push("/login")
     }
   }
 }

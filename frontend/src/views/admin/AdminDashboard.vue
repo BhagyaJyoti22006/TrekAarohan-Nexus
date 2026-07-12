@@ -6,7 +6,7 @@
 </template>
 
 <script>
-import { authStore } from "../store"
+import { authStore } from "../../store"
 
 export default {
   name: "AdminDashboard",
