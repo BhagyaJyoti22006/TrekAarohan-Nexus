@@ -29,7 +29,7 @@ export default {
   },
   computed: {
     isPublicPage() {
-      const p = this.$route.path
+      const p = this.$route?.path || ""
       return !p.startsWith("/admin") && !p.startsWith("/staff") && !p.startsWith("/trekker")
     }
   }
