@@ -1,13 +1,34 @@
 <template>
   <div style="max-width: 1200px; margin: 0 auto; padding: 2rem 1rem;">
-    <h2 style="text-align: center; margin-bottom: 3rem; font-size: 2.5rem; color: var(--text-color);">Explore All Treks</h2>
+    <h2 style="text-align: center; margin-bottom: 2rem; font-size: 2.5rem; color: var(--text-color);">Explore All Treks</h2>
     
+    <!-- Search and Filter Form -->
+    <div style="display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; margin-bottom: 3rem; background: white; padding: 1.5rem; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+      <div style="flex: 1; min-width: 250px;">
+        <input type="text" v-model="searchQuery" class="form-control" placeholder="Search by trek name or location..." style="height: 100%;">
+      </div>
+      <div style="width: 150px;">
+        <input type="number" v-model="filterMaxPrice" class="form-control" placeholder="Max Price (₹)" style="height: 100%;" min="0" step="1">
+      </div>
+      <div style="width: 150px;">
+        <input type="number" v-model="filterDuration" class="form-control" placeholder="Duration (Days)" style="height: 100%;" min="1" step="1">
+      </div>
+      <div style="width: 200px;">
+        <select v-model="filterDifficulty" class="form-control" style="height: 100%;">
+          <option value="">All Difficulties</option>
+          <option value="easy">Easy</option>
+          <option value="medium">Medium</option>
+          <option value="hard">Hard</option>
+        </select>
+      </div>
+      <button @click="clearFilters" class="btn btn-secondary" style="display: flex; align-items: center; justify-content: center;">Clear</button>
+    </div>
     <div v-if="loading" style="text-align: center; padding: 4rem; color: var(--secondary-color);">
       Loading treks...
     </div>
     
     <div v-else style="display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 2.5rem;">
-      <div v-for="trek in treks" :key="trek.id" class="card" style="padding: 0; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); transition: transform 0.2s;">
+      <div v-for="trek in filteredTreks" :key="trek.id" class="card" style="padding: 0; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); transition: transform 0.2s;">
         <div :style="{
           height: '200px',
           backgroundImage: `url(${getCoverImageUrl(trek.cover_image)})`,
@@ -36,9 +57,9 @@
         </div>
       </div>
       
-      <div v-if="treks.length === 0" style="grid-column: 1 / -1; text-align: center; padding: 4rem; background: #f9fafb; border-radius: 12px; color: var(--secondary-color);">
-        <h3 style="margin-top: 0;">More Treks Coming Soon!</h3>
-        <p>We are currently updating our catalog with new adventures.</p>
+      <div v-if="filteredTreks.length === 0" style="grid-column: 1 / -1; text-align: center; padding: 4rem; background: #f9fafb; border-radius: 12px; color: var(--secondary-color);">
+        <h3 style="margin-top: 0;">No Treks Found</h3>
+        <p>Try adjusting your search criteria or clearing filters.</p>
       </div>
     </div>
   </div>
@@ -53,7 +74,23 @@ export default {
     return {
       treks: [],
       loading: true,
+      searchQuery: "",
+      filterMaxPrice: "",
+      filterDifficulty: "",
+      filterDuration: "",
       SERVER_URL
+    }
+  },
+  computed: {
+    filteredTreks() {
+      return this.treks.filter(trek => {
+        const searchLower = this.searchQuery.toLowerCase()
+        const matchSearch = trek.name.toLowerCase().includes(searchLower) || trek.location.toLowerCase().includes(searchLower)
+        const matchMaxPrice = this.filterMaxPrice === "" || parseFloat(trek.price) <= parseFloat(this.filterMaxPrice)
+        const matchDifficulty = this.filterDifficulty === "" || trek.difficulty === this.filterDifficulty
+        const matchDuration = this.filterDuration === "" || trek.duration == this.filterDuration
+        return matchSearch && matchMaxPrice && matchDifficulty && matchDuration
+      })
     }
   },
   async mounted() {
@@ -85,6 +122,12 @@ export default {
         return `${SERVER_URL}${path}`
       }
       return `${SERVER_URL}/static/images/trek.jpg`
+    },
+    clearFilters() {
+      this.searchQuery = ""
+      this.filterMaxPrice = ""
+      this.filterDifficulty = ""
+      this.filterDuration = ""
     }
   }
 }
