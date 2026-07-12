@@ -4,7 +4,7 @@
     <div :style="{
       position: 'relative', margin: '0 0 2rem 0', height: '500px', display: 'flex', alignItems: 'center', 
       justifyContent: 'center', textAlign: 'center', color: 'white', backgroundColor: 'var(--primary-color)', 
-      backgroundImage: `linear-gradient(rgba(44, 94, 59, 0.6), rgba(44, 94, 59, 0.6)), url(${SERVER_URL}/static/images/tac.jpg)`, 
+      backgroundImage: `linear-gradient(rgba(44, 94, 59, 0.6), rgba(44, 94, 59, 0.6)), url(${SERVER_URL}/static/images/tan.jpg)`, 
       backgroundSize: 'cover', backgroundPosition: 'center'
     }">
       <div style="max-width: 800px; padding: 2rem;">

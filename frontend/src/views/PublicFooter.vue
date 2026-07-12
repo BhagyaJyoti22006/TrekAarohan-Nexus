@@ -10,7 +10,7 @@
           Need help with your upcoming adventure? Reach out to our support team!
         </p>
         <ul style="list-style: none; padding: 0; color: var(--secondary-color); line-height: 1.8;">
-          <li><strong>Email:</strong> support@tac.com</li>
+          <li><strong>Email:</strong> support@tan.com</li>
           <li><strong>Phone:</strong> +91 98765 43210</li>
           <li><strong>Address:</strong> 123 Adventure Town, Trek Pradesh, India</li>
         </ul>

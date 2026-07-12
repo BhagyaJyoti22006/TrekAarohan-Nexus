@@ -15,13 +15,13 @@ with app.app_context():
             password=generate_password_hash("admin123"),
             role=2,  # 2 = Admin
             name="System Administrator",
-            email="admin@tac.com",
+            email="admin@tan.com",
             phone="0000000000",
             is_blacklisted=False,
         )
         db.session.add(admin_user)
         db.session.commit()
-        print("Database 'tac.db' created successfully.")
+        print("Database 'tan.db' created successfully.")
         print("Default Admin user generated (Username: admin | Password: admin123).")
     else:
         print("Database already initialized.")
