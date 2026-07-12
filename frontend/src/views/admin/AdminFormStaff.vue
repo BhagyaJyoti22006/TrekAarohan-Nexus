@@ -1,11 +1,10 @@
 <template>
   <div>
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
-      <h2>Add New Staff</h2>
-      <router-link to="/admin/staffs" class="btn btn-secondary">Back to Staffs</router-link>
-    </div>
-    
-    <div class="card" style="max-width: 600px;">
+    <div class="card" style="max-width: 600px; margin: 0 auto;">
+      <div style="margin-bottom: 2rem; border-bottom: 1px solid var(--border-color); padding-bottom: 1rem;">
+        <h3 style="margin: 0; color: var(--primary-color);">Register New Staff</h3>
+      </div>
+      
       <div v-if="error" style="padding: 0.75rem; margin-bottom: 1rem; border-radius: 6px; background-color: #fee2e2; color: #991b1b;">
         {{ error }}
       </div>
@@ -36,13 +35,20 @@
         
         <div class="form-group" style="margin-bottom: 1.5rem;">
           <label class="form-label">Experience (Optional)</label>
-          <textarea v-model="form.experience" class="form-control" rows="3" placeholder="List any relevant trekking experience..."></textarea>
+          <textarea v-model="form.experience" class="form-control" rows="3" placeholder="List any relevant trekking experience..." style="resize: vertical;"></textarea>
         </div>
         
-        <button type="submit" class="btn btn-primary" style="width: 100%; padding: 1rem; font-size: 1rem;" :disabled="loading">
-          {{ loading ? "Creating..." : "Create Staff Account" }}
-        </button>
+        <div style="display: flex; justify-content: flex-end; gap: 1rem; margin-top: 2rem;">
+          <router-link to="/admin/staffs" class="btn btn-secondary">Cancel</router-link>
+          <button type="submit" class="btn btn-primary" :disabled="loading">
+            {{ loading ? "Registering..." : "Register New Staff" }}
+          </button>
+        </div>
       </form>
+      
+      <div v-else style="display: flex; justify-content: flex-end; margin-top: 2rem;">
+        <router-link to="/admin/staffs" class="btn btn-secondary">Back to staffs</router-link>
+      </div>
     </div>
   </div>
 </template>
@@ -108,6 +114,7 @@ export default {
         this.error = err.message
       } finally {
         this.loading = false
+        document.querySelector('.card').scrollIntoView({ behavior: 'smooth' })
       }
     }
   }

@@ -3,11 +3,11 @@
     
     <div class="sidebar">
       <div class="sidebar-links">
-        <router-link to="/admin" exact-active-class="active">TAC Overview</router-link>
-        <router-link to="/admin/treks" active-class="active">Manage Treks</router-link>
-        <router-link to="/admin/staffs" active-class="active">Manage Staffs</router-link>
-        <router-link to="/admin/trekkers" active-class="active">Manage Trekkers</router-link>
-        <router-link to="/admin/bookings" active-class="active">Manage Bookings</router-link>
+        <router-link to="/admin" :class="{ active: $route.path === '/admin' }">TAC Overview</router-link>
+        <router-link to="/admin/treks" :class="{ active: $route.path.startsWith('/admin/treks') }">Manage Treks</router-link>
+        <router-link to="/admin/staffs" :class="{ active: $route.path.startsWith('/admin/staffs') }">Manage Staffs</router-link>
+        <router-link to="/admin/trekkers" :class="{ active: $route.path.startsWith('/admin/trekkers') }">Manage Trekkers</router-link>
+        <router-link to="/admin/bookings" :class="{ active: $route.path.startsWith('/admin/bookings') }">Manage Bookings</router-link>
       </div>
       
       <div class="sidebar-bottom">

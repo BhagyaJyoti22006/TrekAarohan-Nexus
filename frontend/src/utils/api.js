@@ -8,6 +8,10 @@ export async function apiFetch(endpoint, options = {}) {
     ...options.headers
   }
   
+  if (options.body instanceof FormData) {
+    delete headers["Content-Type"]
+  }
+  
   if (authStore.isAuthenticated) {
     headers["Authorization"] = `Bearer ${authStore.token}`
   }

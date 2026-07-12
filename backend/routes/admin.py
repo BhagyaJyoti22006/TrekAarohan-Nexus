@@ -1,7 +1,10 @@
+import os
+from datetime import datetime
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt
 from werkzeug.security import generate_password_hash
-from models import db, User
+from werkzeug.utils import secure_filename
+from models import db, User, Trek
 
 admin_bp = Blueprint("admin", __name__)
 
@@ -127,4 +130,69 @@ def toggle_trekker_blacklist(trekker_id):
     
     status = "blacklisted" if trekker.is_blacklisted else "unblacklisted"
     return jsonify({"message": f"Trekker {status} successfully"}), 200
+
+
+@admin_bp.route("/treks", methods=["POST"])
+@jwt_required()
+def create_trek():
+    if not admin_required():
+        return jsonify({"error": "Admin access required"}), 403
+    
+    data = request.form
+    
+    name = data.get("name")
+    location = data.get("location")
+    description = data.get("description", "")
+    difficulty = data.get("difficulty")
+    start_date_str = data.get("start_date")
+    end_date_str = data.get("end_date")
+    slots_available = data.get("slots_available")
+    price = data.get("price")
+    assigned_staff_id = data.get("assigned_staff_id")
+    
+    if not all([name, location, difficulty, start_date_str, end_date_str, slots_available, price, assigned_staff_id]):
+        return jsonify({"error": "All required fields must be provided"}), 400
+    
+    try:
+        start_date = datetime.strptime(start_date_str, "%Y-%m-%d").date()
+        end_date = datetime.strptime(end_date_str, "%Y-%m-%d").date()
+    except ValueError:
+        return jsonify({"error": "Invalid date format. Use YYYY-MM-DD"}), 400
+    
+    if start_date > end_date:
+        return jsonify({"error": "Start date must be before or equal to end date"}), 400
+    
+    staff = User.query.get(assigned_staff_id)
+    if not staff or staff.role != 1 or staff.is_blacklisted:
+        return jsonify({"error": "Invalid or blacklisted staff member selected"}), 400
+    
+    cover_image_path = None
+    if "cover_image" in request.files:
+        file = request.files["cover_image"]
+        if file.filename != "":
+            filename = secure_filename(file.filename)
+            filename = f"{datetime.now().strftime('%Y%m%d%H%M%S')}_{filename}"
+            upload_folder = os.path.join(os.path.dirname(os.path.dirname(__file__)), "static", "uploads")
+            os.makedirs(upload_folder, exist_ok=True)
+            file_path = os.path.join(upload_folder, filename)
+            file.save(file_path)
+            cover_image_path = f"/static/uploads/{filename}"
+    
+    new_trek = Trek(
+        name=name,
+        location=location,
+        description=description,
+        difficulty=difficulty,
+        start_date=start_date,
+        end_date=end_date,
+        slots_available=int(slots_available),
+        price=float(price),
+        assigned_staff_id=int(assigned_staff_id),
+        cover_image=cover_image_path
+    )
+    
+    db.session.add(new_trek)
+    db.session.commit()
+    
+    return jsonify({"message": "Trek created successfully", "trek_id": new_trek.id}), 201
 

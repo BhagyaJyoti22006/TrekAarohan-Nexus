@@ -7,6 +7,7 @@ import Register from "../views/Register.vue"
 import AdminLayout from "../views/admin/AdminLayout.vue"
 import AdminDashboard from "../views/admin/AdminDashboard.vue"
 import AdminTreks from "../views/admin/AdminTreks.vue"
+import AdminFormTrek from "../views/admin/AdminFormTrek.vue"
 import AdminStaffs from "../views/admin/AdminStaffs.vue"
 import AdminFormStaff from "../views/admin/AdminFormStaff.vue"
 import AdminTrekkers from "../views/admin/AdminTrekkers.vue"
@@ -25,6 +26,7 @@ const routes = [
     children: [
       { path: "", component: AdminDashboard },
       { path: "treks", component: AdminTreks },
+      { path: "treks/new", component: AdminFormTrek },
       { path: "staffs", component: AdminStaffs },
       { path: "staffs/new", component: AdminFormStaff },
       { path: "trekkers", component: AdminTrekkers },

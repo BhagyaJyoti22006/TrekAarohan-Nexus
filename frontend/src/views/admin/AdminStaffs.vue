@@ -2,7 +2,7 @@
   <div>
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
       <h2>Manage Staffs</h2>
-      <router-link to="/admin/staffs/new" class="btn btn-accent">+ Add New Staff</router-link>
+      <router-link to="/admin/staffs/new" class="btn btn-accent">Register New Staff</router-link>
     </div>
     
     <div class="data-table-wrapper">
@@ -39,7 +39,7 @@
           </tr>
           <tr v-if="staffs.length === 0 && !loading">
             <td colspan="8" style="text-align: center; padding: 2rem; color: var(--secondary-color);">
-              No staffs found. Click "+ Add New Staff" to create one.
+              No staffs found. Click "Register New Staff" to register one.
             </td>
           </tr>
           <tr v-if="loading">
