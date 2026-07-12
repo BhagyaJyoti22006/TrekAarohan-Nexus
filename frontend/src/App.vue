@@ -5,12 +5,6 @@
     <div class="app-content" style="flex-grow: 1; background: white; padding: 0;">
       <!-- Router View will render the matched component here -->
       <router-view></router-view>
-      
-      <!-- Placeholder Home -->
-      <div style="padding: 3rem; text-align: center;" v-if="$route.path === '/'">
-        <h1>Welcome to TrekAarohan-Nexus</h1>
-        <p>The Vue.js frontend is successfully running!</p>
-      </div>
     </div>
     
     <Footer v-if="isPublicPage" />

@@ -137,7 +137,7 @@ export default {
     formatDate(dateString) {
       if (!dateString) return ""
       const d = new Date(dateString)
-      return d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
+      return d.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })
     },
     capitalize(str) {
       if (!str) return ""

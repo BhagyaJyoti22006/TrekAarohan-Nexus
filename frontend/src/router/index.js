@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from "vue-router"
 import { authStore } from "../store"
 
+import Home from "../views/Home.vue"
 import Login from "../views/Login.vue"
 import Register from "../views/Register.vue"
 import TrekDetail from "../views/TrekDetail.vue"
@@ -18,6 +19,7 @@ import StaffDashboard from "../views/StaffDashboard.vue"
 import TrekkerDashboard from "../views/TrekkerDashboard.vue"
 
 const routes = [
+  { path: "/", component: Home },
   { path: "/login", component: Login, meta: { requiresGuest: true } },
   { path: "/register", component: Register, meta: { requiresGuest: true } },
   { path: "/trek/:id", component: TrekDetail },

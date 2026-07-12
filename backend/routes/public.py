@@ -4,12 +4,31 @@ from models import Trek, User, Booking
 
 public_bp = Blueprint("public", __name__)
 
+
+@public_bp.route("/treks/featured", methods=["GET"])
+def get_featured_treks():
+    treks = Trek.query.filter_by(status="open").order_by(Trek.id.desc()).limit(3).all()
+    result = []
+    for trek in treks:
+        result.append({
+            "id": trek.id,
+            "name": trek.name,
+            "location": trek.location,
+            "price": trek.price,
+            "start_date": trek.start_date.isoformat(),
+            "difficulty": trek.difficulty,
+            "cover_image": trek.cover_image,
+            "description": trek.description
+        })
+    return jsonify(result), 200
+
+
 @public_bp.route("/treks/<int:trek_id>", methods=["GET"])
 @jwt_required(optional=True)
 def get_public_trek(trek_id):
     trek = Trek.query.get_or_404(trek_id)
     staff = trek.staff
-    staff_completed_treks = Trek.query.filter_by(assigned_staff_id=staff.id, status='completed').count() if staff else 0
+    staff_completed_treks = Trek.query.filter_by(assigned_staff_id=staff.id, status="completed").count() if staff else 0
     
     booking_status = None
     current_user_id = get_jwt_identity()

@@ -108,10 +108,10 @@ export default {
     return {
       treks: [],
       loading: true,
-      searchQuery: '',
-      filterStatus: '',
-      filterDifficulty: '',
-      filterDuration: ''
+      searchQuery: "",
+      filterStatus: "",
+      filterDifficulty: "",
+      filterDuration: ""
     }
   },
   computed: {
@@ -119,9 +119,9 @@ export default {
       return this.treks.filter(trek => {
         const searchLower = this.searchQuery.toLowerCase()
         const matchSearch = trek.name.toLowerCase().includes(searchLower) || trek.location.toLowerCase().includes(searchLower)
-        const matchStatus = this.filterStatus === '' || trek.status === this.filterStatus
-        const matchDifficulty = this.filterDifficulty === '' || trek.difficulty === this.filterDifficulty
-        const matchDuration = this.filterDuration === '' || trek.duration == this.filterDuration
+        const matchStatus = this.filterStatus === "" || trek.status === this.filterStatus
+        const matchDifficulty = this.filterDifficulty === "" || trek.difficulty === this.filterDifficulty
+        const matchDuration = this.filterDuration === "" || trek.duration == this.filterDuration
         return matchSearch && matchStatus && matchDifficulty && matchDuration
       })
     }
@@ -142,15 +142,15 @@ export default {
       }
     },
     clearFilters() {
-      this.searchQuery = ''
-      this.filterStatus = ''
-      this.filterDifficulty = ''
-      this.filterDuration = ''
+      this.searchQuery = ""
+      this.filterStatus = ""
+      this.filterDifficulty = ""
+      this.filterDuration = ""
     },
     formatDate(dateString) {
       if (!dateString) return ""
       const d = new Date(dateString)
-      return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+      return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
     },
     capitalize(str) {
       if (!str) return ""
