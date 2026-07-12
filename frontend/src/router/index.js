@@ -27,6 +27,7 @@ const routes = [
       { path: "", component: AdminDashboard },
       { path: "treks", component: AdminTreks },
       { path: "treks/new", component: AdminFormTrek },
+      { path: "treks/:id/edit", component: AdminFormTrek },
       { path: "staffs", component: AdminStaffs },
       { path: "staffs/new", component: AdminFormStaff },
       { path: "trekkers", component: AdminTrekkers },

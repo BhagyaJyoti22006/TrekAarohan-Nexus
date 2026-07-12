@@ -2,7 +2,7 @@
   <div>
     <div class="card" style="max-width: 800px; margin: 0 auto;">
       <div style="margin-bottom: 2rem; border-bottom: 1px solid var(--border-color); padding-bottom: 1rem;">
-        <h3 style="margin: 0; color: var(--primary-color);">Add New Trek</h3>
+        <h3 style="margin: 0; color: var(--primary-color);">{{ isEditMode && form.name ? 'Edit Trek: ' + form.name : 'Add New Trek' }}</h3>
       </div>
       
       <div v-if="error" style="padding: 0.75rem; margin-bottom: 1rem; border-radius: 6px; background-color: #fee2e2; color: #991b1b;">
@@ -12,7 +12,7 @@
         {{ success }}
       </div>
       
-      <form @submit.prevent="handleCreateTrek" v-if="!success">
+      <form @submit.prevent="handleSubmit" v-if="!success">
         <fieldset style="border: none; padding: 0; margin: 0;">
           <div style="display: flex; gap: 1.5rem; margin-bottom: 1rem;">
             <div class="form-group" style="flex: 2; margin-bottom: 0;">
@@ -42,6 +42,7 @@
             <div class="form-group" style="flex: 1; margin-bottom: 0;">
               <label class="form-label">Cover Image</label>
               <input type="file" @change="handleFileUpload" class="form-control" accept="image/*">
+              <small v-if="isEditMode && form.cover_image" style="color: var(--secondary-color); margin-top: 0.5rem; display: block;">Current: {{ form.cover_image.split('/').pop() }}</small>
             </div>
           </div>
           
@@ -57,7 +58,7 @@
             </div>
             <div class="form-group" style="flex: 1; margin-bottom: 0;">
               <label class="form-label">Slots Available</label>
-              <input type="number" v-model="form.slots_available" class="form-control" min="1" required>
+              <input type="number" v-model="form.slots_available" class="form-control" :min="isEditMode ? 0 : 1" required>
             </div>
             <div class="form-group" style="flex: 1; margin-bottom: 0;">
               <label class="form-label">Price (₹)</label>
@@ -69,12 +70,23 @@
             <div class="form-group" style="flex: 2; margin-bottom: 0;">
               <label class="form-label">Assign Staff Member</label>
               <select v-model="form.assigned_staff_id" class="form-control" required>
-                <option value="" disabled>Select the trek staff</option>
+                <option value="" disabled>Select an approved staff</option>
                 <option v-for="s in staffOptions" :key="s.id" :value="s.id">
-                  {{ s.name }} ({{ s.username }})
+                  {{ s.name }} ({{ s.username }}) {{ s.is_blacklisted ? '[BLACKLISTED]' : '' }}
                 </option>
               </select>
-              <small style="color: var(--secondary-color); margin-top: 0.5rem; display: block;">Only active staffs are shown.</small>
+              <small style="color: var(--secondary-color); margin-top: 0.5rem; display: block;">Only approved staffs or the assigned staff shown.</small>
+            </div>
+            <div v-if="isEditMode" class="form-group" style="flex: 1; margin-bottom: 0;">
+              <label class="form-label">Status</label>
+              <select v-model="form.status" class="form-control" required>
+                <option value="open">Open</option>
+                <option value="full">Full</option>
+                <option value="ongoing">Ongoing</option>
+                <option value="completed">Completed</option>
+                <option value="cancelled">Cancelled</option>
+              </select>
+              <small style="color: var(--secondary-color); margin-top: 0.5rem; display: block;">May auto-update.</small>
             </div>
           </div>
         </fieldset>
@@ -82,7 +94,7 @@
         <div style="display: flex; justify-content: flex-end; gap: 1rem; margin-top: 2rem;">
           <router-link to="/admin/treks" class="btn btn-secondary">Cancel</router-link>
           <button type="submit" class="btn btn-primary" :disabled="loading">
-            {{ loading ? "Adding..." : "Add Trek" }}
+            {{ isEditMode ? (loading ? 'Saving...' : 'Save Changes') : (loading ? 'Adding...' : 'Add Trek') }}
           </button>
         </div>
       </form>
@@ -101,6 +113,7 @@ export default {
   name: "AdminFormTrek",
   data() {
     return {
+      isEditMode: false,
       form: {
         name: "",
         location: "",
@@ -110,7 +123,9 @@ export default {
         difficulty: "",
         slots_available: 1,
         price: 0.0,
-        assigned_staff_id: ""
+        assigned_staff_id: "",
+        status: "open",
+        cover_image: ""
       },
       cover_image_file: null,
       staffOptions: [],
@@ -120,13 +135,39 @@ export default {
     }
   },
   async mounted() {
+    const trekId = this.$route.params.id
+    if (trekId) {
+      this.isEditMode = true
+      await this.fetchTrek(trekId)
+    }
     await this.fetchStaffs()
   },
   methods: {
+    async fetchTrek(id) {
+      try {
+        const data = await apiFetch(`/admin/treks/${id}`, { method: "GET" })
+        this.form = {
+          name: data.name,
+          location: data.location,
+          description: data.description,
+          start_date: data.start_date,
+          end_date: data.end_date,
+          difficulty: data.difficulty,
+          slots_available: data.slots_available,
+          price: data.price,
+          assigned_staff_id: data.assigned_staff_id,
+          status: data.status,
+          cover_image: data.cover_image
+        }
+      } catch (err) {
+        this.error = "Failed to load trek details."
+      }
+    },
     async fetchStaffs() {
       try {
         const data = await apiFetch("/admin/staffs", { method: "GET" })
-        this.staffOptions = data.filter(s => !s.is_blacklisted)
+        // Show active staffs, OR the currently assigned staff even if blacklisted
+        this.staffOptions = data.filter(s => !s.is_blacklisted || (this.isEditMode && s.id === this.form.assigned_staff_id))
       } catch (err) {
         console.error("Failed to load staffs:", err.message)
       }
@@ -139,11 +180,11 @@ export default {
         this.cover_image_file = null
       }
     },
-    async handleCreateTrek() {
+    async handleSubmit() {
       this.error = null
       this.success = null
       // Frontend date validation
-      if (this.form.start_date && this.form.end_date) {
+	  if (this.form.start_date && this.form.end_date) {
         if (new Date(this.form.start_date) > new Date(this.form.end_date)) {
           this.error = "Start date must be before or equal to end date."
           document.querySelector('.card').scrollIntoView({ behavior: 'smooth' })
@@ -160,15 +201,18 @@ export default {
         if (this.cover_image_file) {
           formData.append("cover_image", this.cover_image_file)
         }
-        const data = await apiFetch("/admin/treks", {
-          method: "POST",
+        const endpoint = this.isEditMode ? `/admin/treks/${this.$route.params.id}` : "/admin/treks"
+        const method = this.isEditMode ? "PUT" : "POST"
+        const data = await apiFetch(endpoint, {
+          method: method,
           body: formData
         })
-        this.success = "Trek added successfully!"
-        // Reset form
-        this.form = {
-          name: "", location: "", description: "", start_date: "", end_date: "",
-          difficulty: "", slots_available: 1, price: 0.0, assigned_staff_id: ""
+        this.success = this.isEditMode ? "Trek updated successfully!" : "Trek added successfully!"
+        if (!this.isEditMode) {
+          this.form = {
+            name: "", location: "", description: "", start_date: "", end_date: "",
+            difficulty: "", slots_available: 1, price: 0.0, assigned_staff_id: "", status: "open", cover_image: ""
+          }
         }
         this.cover_image_file = null
       } catch (err) {
