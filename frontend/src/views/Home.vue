@@ -39,7 +39,7 @@
             
             <p style="color: var(--secondary-color); font-size: 0.95rem; margin: 0 0 0.25rem 0;">📍 {{ trek.location }}</p>
             <div style="display: flex; justify-content: space-between; align-items: center; margin: 0.25rem 0 0.75rem 0;">
-              <p style="color: var(--secondary-color); font-size: 0.95rem; margin: 0;">📅 {{ formatDate(trek.start_date) }}</p>
+              <p style="color: var(--secondary-color); font-size: 0.95rem; margin: 0;">📅 {{ formatDate(trek.start_date) }} &nbsp;|&nbsp; ⏱️ {{ trek.duration }} Days</p>
               <span class="badge badge-active" style="padding: 0.15rem 0.5rem; font-size: 0.8rem;">{{ capitalize(trek.difficulty) }}</span>
             </div>
             

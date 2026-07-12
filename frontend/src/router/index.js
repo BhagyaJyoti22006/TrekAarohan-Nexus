@@ -2,9 +2,10 @@ import { createRouter, createWebHistory } from "vue-router"
 import { authStore } from "../store"
 
 import Home from "../views/Home.vue"
+import PublicTreks from "../views/PublicTreks.vue"
+import TrekDetail from "../views/TrekDetail.vue"
 import Login from "../views/Login.vue"
 import Register from "../views/Register.vue"
-import TrekDetail from "../views/TrekDetail.vue"
 
 import AdminLayout from "../views/admin/AdminLayout.vue"
 import AdminDashboard from "../views/admin/AdminDashboard.vue"
@@ -20,9 +21,10 @@ import TrekkerDashboard from "../views/TrekkerDashboard.vue"
 
 const routes = [
   { path: "/", component: Home },
+  { path: "/treks", component: PublicTreks },
+  { path: "/trek/:id", component: TrekDetail },
   { path: "/login", component: Login, meta: { requiresGuest: true } },
   { path: "/register", component: Register, meta: { requiresGuest: true } },
-  { path: "/trek/:id", component: TrekDetail },
   { 
     path: "/admin", 
     component: AdminLayout, 

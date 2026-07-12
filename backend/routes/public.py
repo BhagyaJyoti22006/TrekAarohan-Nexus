@@ -5,6 +5,25 @@ from models import Trek, User, Booking
 public_bp = Blueprint("public", __name__)
 
 
+@public_bp.route("/treks", methods=["GET"])
+def get_all_open_treks():
+    treks = Trek.query.filter_by(status="open").order_by(Trek.id.desc()).all()
+    result = []
+    for trek in treks:
+        result.append({
+            "id": trek.id,
+            "name": trek.name,
+            "location": trek.location,
+            "price": trek.price,
+            "start_date": trek.start_date.isoformat(),
+            "duration": (trek.end_date - trek.start_date).days + 1,
+            "difficulty": trek.difficulty,
+            "cover_image": trek.cover_image,
+            "description": trek.description
+        })
+    return jsonify(result), 200
+
+
 @public_bp.route("/treks/featured", methods=["GET"])
 def get_featured_treks():
     treks = Trek.query.filter_by(status="open").order_by(Trek.id.desc()).limit(3).all()
@@ -16,6 +35,7 @@ def get_featured_treks():
             "location": trek.location,
             "price": trek.price,
             "start_date": trek.start_date.isoformat(),
+            "duration": (trek.end_date - trek.start_date).days + 1,
             "difficulty": trek.difficulty,
             "cover_image": trek.cover_image,
             "description": trek.description
