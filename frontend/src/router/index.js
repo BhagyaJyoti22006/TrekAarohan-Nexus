@@ -21,6 +21,7 @@ import AdminBookings from "../views/admin/AdminBookings.vue"
 import StaffLayout from "../views/staff/StaffLayout.vue"
 import StaffDashboard from "../views/staff/StaffDashboard.vue"
 import StaffTreks from "../views/staff/StaffTreks.vue"
+import StaffTrekManage from "../views/staff/StaffTrekManage.vue"
 import StaffParticipants from "../views/staff/StaffParticipants.vue"
 import StaffProfile from "../views/staff/StaffProfile.vue"
 
@@ -60,6 +61,7 @@ const routes = [
     children: [
       { path: "", component: StaffDashboard },
       { path: "treks", component: StaffTreks },
+      { path: "treks/:id", component: StaffTrekManage },
       { path: "participants", component: StaffParticipants },
       { path: "profile", component: StaffProfile }
     ]

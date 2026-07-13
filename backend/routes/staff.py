@@ -72,3 +72,105 @@ def cancel_booking(booking_id):
     
     return jsonify({"message": "Booking cancelled successfully. Slot reopened."}), 200
 
+
+@staff_bp.route("/treks", methods=["GET"])
+@jwt_required()
+def get_treks():
+    current_user_id = get_jwt_identity()
+    user = User.query.get(current_user_id)
+    if not user or user.role != 1:
+        return jsonify({"message": "Forbidden."}), 403
+    
+    treks = Trek.query.filter_by(assigned_staff_id=user.id).all()
+    result = []
+    for trek in treks:
+        result.append({
+            "id": trek.id,
+            "name": trek.name,
+            "start_date": trek.start_date.isoformat(),
+            "end_date": trek.end_date.isoformat(),
+            "status": trek.status,
+            "slots_available": trek.slots_available,
+            "active_participants": len([b for b in trek.bookings if b.status in ["booked", "completed"]])
+        })
+    return jsonify(result), 200
+
+
+@staff_bp.route("/treks/<int:trek_id>", methods=["GET"])
+@jwt_required()
+def get_trek(trek_id):
+    current_user_id = get_jwt_identity()
+    user = User.query.get(current_user_id)
+    if not user or user.role != 1:
+        return jsonify({"message": "Forbidden."}), 403
+    
+    trek = Trek.query.get_or_404(trek_id)
+    if trek.assigned_staff_id != user.id:
+        return jsonify({"message": "You do not have permission to manage this trek."}), 403
+    
+    bookings = Booking.query.filter_by(trek_id=trek.id).order_by(Booking.booking_date.desc()).all()
+    
+    serialized_bookings = []
+    for b in bookings:
+        serialized_bookings.append({
+            "id": b.id,
+            "status": b.status,
+            "booking_date": b.booking_date.isoformat(),
+            "user": {
+                "username": b.user.username,
+                "name": b.user.name,
+                "email": b.user.email,
+                "phone": b.user.phone,
+                "emergency_relation": b.user.emergency_relation,
+                "emergency_phone": b.user.emergency_phone
+            }
+        })
+    
+    return jsonify({
+        "id": trek.id,
+        "name": trek.name,
+        "location": trek.location,
+        "price": trek.price,
+        "difficulty": trek.difficulty,
+        "status": trek.status,
+        "slots_available": trek.slots_available,
+        "start_date": trek.start_date.isoformat(),
+        "end_date": trek.end_date.isoformat(),
+        "duration": (trek.end_date - trek.start_date).days + 1,
+        "cover_image": trek.cover_image,
+        "description": trek.description,
+        "bookings": serialized_bookings
+    }), 200
+
+
+@staff_bp.route("/treks/<int:trek_id>", methods=["POST"])
+@jwt_required()
+def update_trek(trek_id):
+    current_user_id = get_jwt_identity()
+    user = User.query.get(current_user_id)
+    if not user or user.role != 1:
+        return jsonify({"message": "Forbidden."}), 403
+    
+    trek = Trek.query.get_or_404(trek_id)
+    if trek.assigned_staff_id != user.id:
+        return jsonify({"message": "You do not have permission to manage this trek."}), 403
+    if trek.status in ["completed", "cancelled"]:
+        return jsonify({"message": "This trek has concluded and cannot be managed."}), 400
+    data = request.json
+    if not data:
+        return jsonify({"message": "No data provided."}), 400
+    
+    new_status = data.get("status")
+    new_slots = data.get("slots_available")
+    if new_status in ["open", "full", "ongoing", "completed", "cancelled"]:
+        trek.status = new_status
+    if new_slots is not None:
+        try:
+            trek.slots_available = int(new_slots)
+        except ValueError:
+            pass
+    
+    db.session.commit()
+    
+    return jsonify({"message": "Trek updated successfully."}), 200
+
