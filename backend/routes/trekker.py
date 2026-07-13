@@ -6,6 +6,54 @@ from models import db, Trek, User, Booking
 trekker_bp = Blueprint("trekker", __name__)
 
 
+@trekker_bp.route("/profile", methods=["GET"])
+@jwt_required()
+def get_profile():
+    current_user_id = get_jwt_identity()
+    user = User.query.get(current_user_id)
+    if not user or user.role != 0:
+        return jsonify({"message": "Forbidden"}), 403
+    
+    return jsonify({
+        "username": user.username,
+        "email": user.email,
+        "name": user.name,
+        "phone": user.phone,
+        "emergency_phone": user.emergency_phone,
+        "emergency_relation": user.emergency_relation,
+        "is_blacklisted": user.is_blacklisted
+    }), 200
+
+
+@trekker_bp.route("/profile", methods=["PUT"])
+@jwt_required()
+def update_profile():
+    current_user_id = get_jwt_identity()
+    user = User.query.get(current_user_id)
+    if not user or user.role != 0:
+        return jsonify({"message": "Forbidden"}), 403
+    
+    data = request.json
+    if not data:
+        return jsonify({"message": "No data provided"}), 400
+    
+    new_email = data.get("email")
+    if new_email and new_email != user.email:
+        existing_email = User.query.filter_by(email=new_email).first()
+        if existing_email:
+            return jsonify({"message": "Email is already registered by another user."}), 400
+    
+    user.email = new_email or user.email
+    user.name = data.get("name", user.name)
+    user.phone = data.get("phone", user.phone)
+    user.emergency_phone = data.get("emergency_phone", user.emergency_phone)
+    user.emergency_relation = data.get("emergency_relation", user.emergency_relation)
+    
+    db.session.commit()
+    
+    return jsonify({"message": "Profile updated successfully."}), 200
+
+
 @trekker_bp.route("/treks/<int:trek_id>/book", methods=["POST"])
 @jwt_required()
 def book_trek(trek_id):

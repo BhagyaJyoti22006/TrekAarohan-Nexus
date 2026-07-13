@@ -31,7 +31,7 @@ export async function apiFetch(endpoint, options = {}) {
   const data = await response.json()
   
   if (!response.ok) {
-    throw new Error(data.error || "An error occurred")
+    throw new Error(data.error || data.message || "An error occurred")
   }
   
   return data
