@@ -6,6 +6,64 @@ from models import db, Trek, User, Booking
 staff_bp = Blueprint("staff", __name__)
 
 
+@staff_bp.route("/profile", methods=["GET"])
+@jwt_required()
+def get_profile():
+    current_user_id = get_jwt_identity()
+    user = User.query.get(current_user_id)
+    if not user or user.role != 1:
+        return jsonify({"message": "Forbidden."}), 403
+    
+    return jsonify({
+        "username": user.username,
+        "email": user.email,
+        "name": user.name,
+        "phone": user.phone,
+        "emergency_phone": user.emergency_phone,
+        "emergency_relation": user.emergency_relation,
+        "experience": user.experience,
+        "is_blacklisted": user.is_blacklisted
+    }), 200
+
+
+@staff_bp.route("/profile", methods=["PUT"])
+@jwt_required()
+def update_profile():
+    current_user_id = get_jwt_identity()
+    user = User.query.get(current_user_id)
+    if not user or user.role != 1:
+        return jsonify({"message": "Forbidden."}), 403
+    
+    data = request.json
+    if not data:
+        return jsonify({"message": "No data provided."}), 400
+    
+    name = data.get("name")
+    email = data.get("email")
+    phone = data.get("phone")
+    emergency_phone = data.get("emergency_phone")
+    emergency_relation = data.get("emergency_relation")
+    experience = data.get("experience")
+    
+    if not name or not phone or not email:
+        return jsonify({"message": "Name, Email, and Phone number are required."}), 400
+    
+    existing_user = User.query.filter(User.email == email, User.id != current_user_id).first()
+    if existing_user:
+        return jsonify({"message": "Email is already registered by another user."}), 400
+    
+    user.name = name
+    user.email = email
+    user.phone = phone
+    user.emergency_phone = emergency_phone
+    user.emergency_relation = emergency_relation
+    user.experience = experience
+    
+    db.session.commit()
+    
+    return jsonify({"message": "Profile updated successfully."}), 200
+
+
 @staff_bp.route("/participants", methods=["GET"])
 @jwt_required()
 def get_participants():
