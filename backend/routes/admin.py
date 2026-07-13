@@ -273,6 +273,23 @@ def get_trek(trek_id):
     staff = trek.staff
     staff_completed_treks = Trek.query.filter_by(assigned_staff_id=staff.id, status='completed').count() if staff else 0
     
+    bookings = Booking.query.filter_by(trek_id=trek.id).order_by(Booking.booking_date.desc()).all()
+    serialized_bookings = []
+    for b in bookings:
+        serialized_bookings.append({
+            "id": b.id,
+            "status": b.status,
+            "booking_date": b.booking_date.isoformat(),
+            "user": {
+                "username": b.user.username,
+                "name": b.user.name,
+                "email": b.user.email,
+                "phone": b.user.phone,
+                "emergency_relation": b.user.emergency_relation,
+                "emergency_phone": b.user.emergency_phone
+            }
+        })
+    
     return jsonify({
         "id": trek.id,
         "name": trek.name,
@@ -289,7 +306,8 @@ def get_trek(trek_id):
         "assigned_staff_id": trek.assigned_staff_id,
         "staff_name": staff.name if staff else "Unassigned",
         "staff_experience": staff.experience if staff else "",
-        "staff_completed_treks": staff_completed_treks
+        "staff_completed_treks": staff_completed_treks,
+        "bookings": serialized_bookings
     }), 200
 
 
@@ -351,4 +369,29 @@ def update_trek(trek_id):
     
     db.session.commit()
     return jsonify({"message": "Trek updated successfully"}), 200
+
+
+@admin_bp.route("/cancel_booking/<int:booking_id>", methods=["POST"])
+@jwt_required()
+def cancel_booking(booking_id):
+    if not admin_required():
+        return jsonify({"error": "Admin access required"}), 403
+    
+    booking = Booking.query.get_or_404(booking_id)
+    trek = booking.trek
+    
+    if booking.status != "booked":
+        return jsonify({"message": "This booking cannot be cancelled."}), 400
+    if trek.status in ["completed", "cancelled"]:
+        return jsonify({"message": "You cannot cancel a booking for a trek that has already concluded."}), 400
+    
+    booking.status = "cancelled"
+    booking.cancelled_date = datetime.utcnow()
+    trek.slots_available += 1
+    if trek.status == "full":
+        trek.status = "open"
+    
+    db.session.commit()
+    
+    return jsonify({"message": "Booking cancelled successfully. Slot reopened."}), 200
 

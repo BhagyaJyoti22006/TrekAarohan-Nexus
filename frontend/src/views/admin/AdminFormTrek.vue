@@ -12,7 +12,7 @@
         {{ success }}
       </div>
       
-      <form @submit.prevent="handleSubmit" v-if="!success">
+      <form @submit.prevent="handleSubmit">
         <fieldset style="border: none; padding: 0; margin: 0;">
           <div style="display: flex; gap: 1.5rem; margin-bottom: 1rem;">
             <div class="form-group" style="flex: 2; margin-bottom: 0;">
@@ -98,10 +98,71 @@
           </button>
         </div>
       </form>
-      
-      <div v-else style="display: flex; justify-content: flex-end; margin-top: 2rem;">
-        <router-link to="/admin/treks" class="btn btn-secondary">Back to treks</router-link>
+    </div>
+    
+    <div v-if="isEditMode && trek" class="card" style="max-width: 800px; margin: 2rem auto 0 auto;">
+      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; padding-bottom: 0.5rem; margin-bottom: 1.5rem;">
+        <h3 style="margin: 0; color: var(--text-color);">Participant Roster</h3>
+        
+        <span v-if="['completed', 'cancelled'].includes(trek.status)" class="badge" style="font-size: 1rem; padding: 0.5rem 1rem; background-color: var(--secondary-color); color: white; border: 1px solid var(--secondary-color);">
+          Concluded
+        </span>
+        <span v-else-if="trek.slots_available === 0" class="badge" style="font-size: 1rem; padding: 0.5rem 1rem; background-color: var(--accent-color); color: white; border: 1px solid var(--accent-color);">
+          All {{ bookedCount + trek.slots_available }} Slots Booked
+        </span>
+        <span v-else class="badge" style="font-size: 1rem; padding: 0.5rem 1rem; background-color: #FEF3C7; color: var(--accent-color); border: 1px solid var(--accent-color);">
+          {{ bookedCount }} / {{ bookedCount + trek.slots_available }} Slots Booked
+        </span>
       </div>
+      
+      <div v-if="trek.bookings && trek.bookings.length > 0" class="data-table-wrapper">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Booking ID</th>
+              <th>Trekker</th>
+              <th>Contact</th>
+              <th>Emergency</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="booking in trek.bookings" :key="booking.id">
+              <td>#{{ booking.id }}</td>
+              <td>
+                <strong>{{ booking.user.name }}</strong><br>
+                <span style="font-size: 0.85rem; color: var(--secondary-color);">{{ booking.user.username }}</span>
+              </td>
+              <td>
+                {{ booking.user.email }}<br>
+                {{ booking.user.phone || "N/A" }}
+              </td>
+              <td>
+                {{ booking.user.emergency_relation || "N/A" }}<br>
+                {{ booking.user.emergency_phone || "N/A" }}
+              </td>
+              <td>
+                <span v-if="booking.status === 'booked'" class="badge badge-active">Active</span>
+                <span v-else-if="booking.status === 'cancelled'" class="badge badge-blacklisted">Cancelled</span>
+                <span v-else-if="booking.status === 'completed'" class="badge badge-active">Completed</span>
+              </td>
+              <td>
+                <button 
+                  v-if="booking.status === 'booked'"
+                  @click="cancelBooking(booking.id)"
+                  class="btn btn-danger" 
+                  style="padding: 0.25rem 0.5rem; font-size: 0.8rem;"
+                  :disabled="cancellingId === booking.id"
+                >
+                  {{ cancellingId === booking.id ? "Cancelling..." : "Cancel" }}
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p v-else style="color: var(--secondary-color); text-align: center; padding: 2rem 0;">No active participants found for this trek.</p>
     </div>
   </div>
 </template>
@@ -114,6 +175,8 @@ export default {
   data() {
     return {
       isEditMode: false,
+      trek: null,
+      cancellingId: null,
       form: {
         name: "",
         location: "",
@@ -134,6 +197,12 @@ export default {
       loading: false
     }
   },
+  computed: {
+    bookedCount() {
+      if (!this.trek || !this.trek.bookings) return 0;
+      return this.trek.bookings.filter(b => ['booked', 'completed'].includes(b.status)).length;
+    }
+  },
   async mounted() {
     const trekId = this.$route.params.id
     if (trekId) {
@@ -146,6 +215,7 @@ export default {
     async fetchTrek(id) {
       try {
         const data = await apiFetch(`/admin/treks/${id}`, { method: "GET" })
+        this.trek = data
         this.form = {
           name: data.name,
           location: data.location,
@@ -219,6 +289,30 @@ export default {
         this.error = err.message
       } finally {
         this.loading = false
+        document.querySelector('.card').scrollIntoView({ behavior: 'smooth' })
+      }
+    },
+    async cancelBooking(bookingId) {
+      if (!confirm('Are you sure you want to cancel this booking? This will reopen a slot.')) {
+        return
+      }
+      this.error = null
+      this.success = null
+      this.cancellingId = bookingId
+      try {
+        const res = await apiFetch(`/admin/cancel_booking/${bookingId}`, {
+          method: "POST"
+        })
+        this.success = res.message || "Booking cancelled successfully."
+        // Refresh trek details
+        const data = await apiFetch(`/admin/treks/${this.$route.params.id}`, { method: "GET" })
+        this.trek = data
+        this.form.slots_available = data.slots_available
+        this.form.status = data.status
+      } catch (e) {
+        this.error = e.message || "Failed to cancel booking"
+      } finally {
+        this.cancellingId = null
         document.querySelector('.card').scrollIntoView({ behavior: 'smooth' })
       }
     }
