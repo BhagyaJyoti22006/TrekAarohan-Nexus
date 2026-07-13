@@ -19,7 +19,12 @@ import AdminTrekkers from "../views/admin/AdminTrekkers.vue"
 import AdminBookings from "../views/admin/AdminBookings.vue"
 
 import StaffDashboard from "../views/StaffDashboard.vue"
-import TrekkerDashboard from "../views/TrekkerDashboard.vue"
+
+import TrekkerLayout from "../views/trekker/TrekkerLayout.vue"
+import TrekkerDashboard from "../views/trekker/TrekkerDashboard.vue"
+import TrekkerBookings from "../views/trekker/TrekkerBookings.vue"
+import TrekkerHistory from "../views/trekker/TrekkerHistory.vue"
+import TrekkerProfile from "../views/trekker/TrekkerProfile.vue"
 
 const routes = [
   { path: "/", component: Home },
@@ -45,7 +50,17 @@ const routes = [
     ]
   },
   { path: "/staff", component: StaffDashboard, meta: { requiresAuth: true, role: "staff" } },
-  { path: "/trekker", component: TrekkerDashboard, meta: { requiresAuth: true, role: "trekker" } }
+  { 
+    path: "/trekker", 
+    component: TrekkerLayout, 
+    meta: { requiresAuth: true, role: "trekker" },
+    children: [
+      { path: "", component: TrekkerDashboard },
+      { path: "bookings", component: TrekkerBookings },
+      { path: "history", component: TrekkerHistory },
+      { path: "profile", component: TrekkerProfile }
+    ]
+  }
 ]
 
 const router = createRouter({
