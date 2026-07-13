@@ -81,7 +81,7 @@ export default {
   async mounted() {
     try {
       this.profile = await apiFetch("/trekker/profile")
-      this.stats = await apiFetch("/trekker/stats")
+      this.stats = await apiFetch("/trekker/dashboard")
       this.availableTreks = await apiFetch("/treks/featured")
     } catch (e) {
       console.error(e)

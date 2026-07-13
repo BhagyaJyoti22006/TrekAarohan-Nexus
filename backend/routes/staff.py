@@ -89,6 +89,13 @@ def update_profile():
     if not name or not phone or not email:
         return jsonify({"message": "Name, Email, and Phone number are required."}), 400
     
+    try:
+        int(phone)
+        if emergency_phone:
+            int(emergency_phone)
+    except (ValueError, TypeError):
+        return jsonify({"message": "Phone numbers must be valid numbers."}), 400
+        
     existing_user = User.query.filter(User.email == email, User.id != current_user_id).first()
     if existing_user:
         return jsonify({"message": "Email is already registered by another user."}), 400

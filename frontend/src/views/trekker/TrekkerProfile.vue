@@ -32,7 +32,7 @@
         
         <div class="form-group">
           <label for="phone">Phone Number <span style="color: #ef4444;">*</span></label>
-          <input type="text" id="phone" v-model="profile.phone" class="form-control" required>
+          <input type="number" id="phone" v-model="profile.phone" class="form-control" required>
         </div>
         
         <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 0.5rem 0;">
@@ -40,7 +40,7 @@
         
         <div class="form-group">
           <label for="emergency_phone">Phone Number</label>
-          <input type="text" id="emergency_phone" v-model="profile.emergency_phone" class="form-control">
+          <input type="number" id="emergency_phone" v-model="profile.emergency_phone" class="form-control">
           <small style="color: var(--secondary-color); display: block; margin-top: 0.25rem;">We will only call this number in case of an emergency.</small>
         </div>
         

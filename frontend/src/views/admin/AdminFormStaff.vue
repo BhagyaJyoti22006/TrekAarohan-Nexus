@@ -30,7 +30,7 @@
         
         <div class="form-group">
           <label class="form-label">Phone Number</label>
-          <input type="text" v-model="form.phone" class="form-control" required>
+          <input type="number" v-model="form.phone" class="form-control" required>
         </div>
         
         <div class="form-group" style="margin-bottom: 1.5rem;">

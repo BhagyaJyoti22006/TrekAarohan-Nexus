@@ -18,8 +18,13 @@ def register():
     email = data.get("email")
     phone = data.get("phone")
     
-    if not all([username, password, name, email, phone]):
-        return jsonify({"error": "All fields are required"}), 400
+    if not username or not email or not password or not name or not phone:
+        return jsonify({"message": "Missing required fields"}), 400
+    
+    try:
+        int(phone)
+    except (ValueError, TypeError):
+        return jsonify({"message": "Phone number must be a valid number."}), 400
     
     if User.query.filter_by(username=username).first():
         return jsonify({"error": "Username already exists"}), 400

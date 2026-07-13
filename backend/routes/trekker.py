@@ -6,9 +6,9 @@ from models import db, Trek, User, Booking
 trekker_bp = Blueprint("trekker", __name__)
 
 
-@trekker_bp.route("/stats", methods=["GET"])
+@trekker_bp.route("/dashboard", methods=["GET"])
 @jwt_required()
-def get_stats():
+def get_dashboard():
     current_user_id = get_jwt_identity()
     user = User.query.get(current_user_id)
     if not user or user.role != 0:
@@ -55,19 +55,33 @@ def update_profile():
     
     data = request.json
     if not data:
-        return jsonify({"message": "No data provided"}), 400
+        return jsonify({"message": "No data provided."}), 400
     
-    new_email = data.get("email")
-    if new_email and new_email != user.email:
-        existing_email = User.query.filter_by(email=new_email).first()
-        if existing_email:
-            return jsonify({"message": "Email is already registered by another user."}), 400
+    name = data.get("name")
+    email = data.get("email")
+    phone = data.get("phone")
+    emergency_phone = data.get("emergency_phone")
+    emergency_relation = data.get("emergency_relation")
     
-    user.email = new_email or user.email
-    user.name = data.get("name", user.name)
-    user.phone = data.get("phone", user.phone)
-    user.emergency_phone = data.get("emergency_phone", user.emergency_phone)
-    user.emergency_relation = data.get("emergency_relation", user.emergency_relation)
+    if not name or not phone or not email:
+        return jsonify({"message": "Name, Email, and Phone number are required."}), 400
+    
+    try:
+        int(phone)
+        if emergency_phone:
+            int(emergency_phone)
+    except (ValueError, TypeError):
+        return jsonify({"message": "Phone numbers must be valid numbers."}), 400
+    
+    existing_user = User.query.filter(User.email == email, User.id != current_user_id).first()
+    if existing_user:
+        return jsonify({"message": "Email is already registered by another user."}), 400
+    
+    user.name = name
+    user.email = email
+    user.phone = phone
+    user.emergency_phone = emergency_phone
+    user.emergency_relation = emergency_relation
     
     db.session.commit()
     
@@ -88,9 +102,9 @@ def book_trek(trek_id):
     trek = Trek.query.get_or_404(trek_id)
     if trek.status != "open":
         return jsonify({"message": "This trek is no longer open for booking."}), 400
-    if trek.slots_available <= 0:
-        return jsonify({"message": "This trek is sold out."}), 400
-    
+    if not user.name or not user.phone or not user.email:
+        return jsonify({"message": "Name, Email, and Phone number are required."}), 400
+        
     existing_booking = Booking.query.filter_by(user_id=user.id, trek_id=trek.id, status="booked").first()
     if existing_booking:
         return jsonify({"message": "You have already booked this trek."}), 400
