@@ -18,7 +18,11 @@ import AdminFormStaff from "../views/admin/AdminFormStaff.vue"
 import AdminTrekkers from "../views/admin/AdminTrekkers.vue"
 import AdminBookings from "../views/admin/AdminBookings.vue"
 
-import StaffDashboard from "../views/StaffDashboard.vue"
+import StaffLayout from "../views/staff/StaffLayout.vue"
+import StaffDashboard from "../views/staff/StaffDashboard.vue"
+import StaffTreks from "../views/staff/StaffTreks.vue"
+import StaffParticipants from "../views/staff/StaffParticipants.vue"
+import StaffProfile from "../views/staff/StaffProfile.vue"
 
 import TrekkerLayout from "../views/trekker/TrekkerLayout.vue"
 import TrekkerDashboard from "../views/trekker/TrekkerDashboard.vue"
@@ -49,7 +53,17 @@ const routes = [
       { path: "bookings", component: AdminBookings }
     ]
   },
-  { path: "/staff", component: StaffDashboard, meta: { requiresAuth: true, role: "staff" } },
+  { 
+    path: "/staff", 
+    component: StaffLayout, 
+    meta: { requiresAuth: true, role: "staff" },
+    children: [
+      { path: "", component: StaffDashboard },
+      { path: "treks", component: StaffTreks },
+      { path: "participants", component: StaffParticipants },
+      { path: "profile", component: StaffProfile }
+    ]
+  },
   { 
     path: "/trekker", 
     component: TrekkerLayout, 
