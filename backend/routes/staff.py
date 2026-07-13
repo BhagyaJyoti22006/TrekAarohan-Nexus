@@ -6,6 +6,47 @@ from models import db, Trek, User, Booking
 staff_bp = Blueprint("staff", __name__)
 
 
+@staff_bp.route("/dashboard", methods=["GET"])
+@jwt_required()
+def get_dashboard():
+    current_user_id = get_jwt_identity()
+    user = User.query.get(current_user_id)
+    if not user or user.role != 1:
+        return jsonify({"message": "Forbidden."}), 403
+    
+    assigned_treks = Trek.query.filter_by(assigned_staff_id=user.id).all()
+    total_treks = len(assigned_treks)
+    
+    active_trek_ids = [t.id for t in assigned_treks if t.status not in ["completed", "cancelled"]]
+    active_participants = 0
+    if active_trek_ids:
+        active_participants = Booking.query.filter(Booking.trek_id.in_(active_trek_ids), Booking.status == "booked").count()
+    
+    all_trek_ids = [t.id for t in assigned_treks]
+    unique_trekkers = 0
+    if all_trek_ids:
+        unique_trekkers = db.session.query(Booking.user_id).filter(Booking.trek_id.in_(all_trek_ids), Booking.status == "booked").distinct().count()
+    
+    ongoing_treks = [t for t in assigned_treks if t.status == "ongoing"]
+    serialized_ongoing = []
+    for t in ongoing_treks:
+        serialized_ongoing.append({
+            "id": t.id,
+            "name": t.name,
+            "location": t.location,
+            "start_date": t.start_date.isoformat(),
+            "end_date": t.end_date.isoformat(),
+            "cover_image": t.cover_image
+        })
+    
+    return jsonify({
+        "total_treks": total_treks,
+        "active_participants": active_participants,
+        "unique_trekkers": unique_trekkers,
+        "ongoing_treks": serialized_ongoing
+    }), 200
+
+
 @staff_bp.route("/profile", methods=["GET"])
 @jwt_required()
 def get_profile():
