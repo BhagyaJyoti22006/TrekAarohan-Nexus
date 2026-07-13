@@ -4,7 +4,7 @@ from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt
 from werkzeug.security import generate_password_hash
 from werkzeug.utils import secure_filename
-from models import db, User, Trek
+from models import db, User, Trek, Booking
 
 admin_bp = Blueprint("admin", __name__)
 
@@ -13,6 +13,43 @@ def admin_required():
     if claims.get("role") != 2:
         return False
     return True
+
+
+@admin_bp.route("/dashboard", methods=["GET"])
+@jwt_required()
+def get_dashboard():
+    if not admin_required():
+        return jsonify({"error": "Admin access required"}), 403
+    
+    total_treks = Trek.query.count()
+    active_bookings = Booking.query.filter_by(status="booked").count()
+    total_trekkers = User.query.filter_by(role=0).count()
+    total_staffs = User.query.filter_by(role=1).count()
+    
+    users = User.query.order_by(User.id.desc()).all()
+    
+    serialized_users = []
+    for u in users:
+        serialized_users.append({
+            "id": u.id,
+            "role": u.role,
+            "username": u.username,
+            "name": u.name,
+            "email": u.email,
+            "phone": u.phone,
+            "emergency_phone": u.emergency_phone,
+            "emergency_relation": u.emergency_relation,
+            "is_blacklisted": u.is_blacklisted
+        })
+    
+    return jsonify({
+        "total_treks": total_treks,
+        "active_bookings": active_bookings,
+        "total_trekkers": total_trekkers,
+        "total_staffs": total_staffs,
+        "admin_name": get_jwt().get("name", "Admin"),
+        "users": serialized_users
+    }), 200
 
 
 @admin_bp.route("/staffs", methods=["GET"])

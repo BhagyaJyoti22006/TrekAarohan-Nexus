@@ -62,8 +62,8 @@ def login():
     if not user or not check_password_hash(user.password, password):
         return jsonify({"error": "Invalid username or password"}), 401
     
-    # Generate token containing user identity and role
-    access_token = create_access_token(identity=str(user.id), additional_claims={"role": user.role})
+    # Generate token containing user identity, role, and name
+    access_token = create_access_token(identity=str(user.id), additional_claims={"role": user.role, "name": user.name})
     
     return jsonify({
         "message": "Login successful",

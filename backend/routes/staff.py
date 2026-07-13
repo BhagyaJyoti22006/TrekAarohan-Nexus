@@ -43,6 +43,7 @@ def get_dashboard():
         "total_treks": total_treks,
         "active_participants": active_participants,
         "unique_trekkers": unique_trekkers,
+        "staff_name": user.name,
         "ongoing_treks": serialized_ongoing
     }), 200
 

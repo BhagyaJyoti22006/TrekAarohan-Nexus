@@ -22,7 +22,8 @@ def get_dashboard():
     return jsonify({
         "upcoming_count": len(upcoming_treks),
         "completed_count": len(completed_treks),
-        "total_count": len(valid_bookings)
+        "total_count": len(valid_bookings),
+        "trekker_name": user.name
     }), 200
 
 
