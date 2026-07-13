@@ -14,14 +14,58 @@
         <router-link to="/trekker/profile" class="btn btn-primary" style="padding: 0.4rem 1rem; background-color: #991b1b; color: white; border: none;">Update Profile</router-link>
     </div>
     
-    <p v-if="loading">Loading dashboard...</p>
-    <p v-else>Placeholder for Dashboard quick stats and available treks.</p>
+    <!-- Quick Stats -->
+    <div v-if="stats" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-top: 2rem; margin-bottom: 3rem;">
+        <div class="card" style="text-align: center; border-top: 4px solid var(--accent-color);">
+            <h3 style="color: var(--secondary-color); font-size: 1rem; margin-top: 0;">Upcoming Treks</h3>
+            <p style="font-size: 2.5rem; font-weight: bold; margin: 0; color: var(--accent-color);">{{ stats.upcoming_count }}</p>
+        </div>
+        <div class="card" style="text-align: center; border-top: 4px solid var(--primary-color);">
+            <h3 style="color: var(--secondary-color); font-size: 1rem; margin-top: 0;">Completed Treks</h3>
+            <p style="font-size: 2.5rem; font-weight: bold; margin: 0; color: var(--primary-color);">{{ stats.completed_count }}</p>
+        </div>
+        <div class="card" style="text-align: center; border-top: 4px solid var(--text-color);">
+            <h3 style="color: var(--secondary-color); font-size: 1rem; margin-top: 0;">Total Bookings</h3>
+            <p style="font-size: 2.5rem; font-weight: bold; margin: 0; color: var(--text-color);">{{ stats.total_count }}</p>
+        </div>
+    </div>
+    
+    <!-- Available Treks -->
+    <div style="margin-bottom: 3rem;" v-if="availableTreks">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+            <h2 style="margin: 0; font-size: 1.5rem;">Available Treks</h2>
+        </div>
+        
+        <div v-if="availableTreks.length > 0" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 2.5rem;">
+            <div v-for="t in availableTreks" :key="t.id" class="card" style="padding: 0; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); transition: transform 0.2s;">
+                <div :style="{ height: '200px', backgroundImage: `url(${getCoverImageUrl(t.cover_image)})`, backgroundSize: 'cover', backgroundPosition: 'center' }"></div>
+                
+                <div style="padding: 1.5rem; display: flex; flex-direction: column; flex-grow: 1;">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.25rem;">
+                        <h3 style="margin: 0; font-size: 1.35rem;">{{ t.name }}</h3>
+                        <span style="font-weight: bold; font-size: 1.2rem; color: var(--primary-color);">₹{{ t.price.toFixed(2) }}</span>
+                    </div>
+                    
+                    <p style="color: var(--secondary-color); font-size: 0.95rem; margin: 0 0 0.5rem 0;">📍 {{ t.location }}</p>
+                    <p style="color: var(--secondary-color); font-size: 0.95rem; margin: 0 0 0.5rem 0;">📅 {{ formatDate(t.start_date) }} to {{ formatDate(t.end_date) }}</p>
+                    <p style="color: var(--secondary-color); font-size: 0.95rem; margin: 0 0 1.5rem 0; font-weight: 500;">⏳ {{ capitalize(t.difficulty) }} difficulty trek for {{ t.duration }} days</p>
+                    
+                    <div style="margin-top: auto; text-align: center;">
+                        <router-link :to="`/trek/${t.id}`" class="btn btn-primary" style="width: 100%; display: block; box-sizing: border-box;">View Details</router-link>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div v-else class="card" style="text-align: center; padding: 3rem; color: var(--secondary-color);">
+            <p style="margin: 0;">No open treks available at the moment. Check back later!</p>
+        </div>
+    </div>
   </div>
 </template>
 
 <script>
 import { authStore } from "../../store"
-import { apiFetch } from "../../utils/api"
+import { apiFetch, SERVER_URL } from "../../utils/api"
 
 export default {
   name: "TrekkerDashboard",
@@ -29,16 +73,37 @@ export default {
     return {
       authStore,
       profile: {},
+      stats: null,
+      availableTreks: null,
       loading: true
     }
   },
   async mounted() {
     try {
       this.profile = await apiFetch("/trekker/profile")
+      this.stats = await apiFetch("/trekker/stats")
+      this.availableTreks = await apiFetch("/treks/featured")
     } catch (e) {
       console.error(e)
     } finally {
       this.loading = false
+    }
+  },
+  methods: {
+    formatDate(dateString) {
+      if (!dateString) return ""
+      const d = new Date(dateString)
+      return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
+    },
+    capitalize(str) {
+      if (!str) return ""
+      return str.charAt(0).toUpperCase() + str.slice(1)
+    },
+    getCoverImageUrl(path) {
+      if (path) {
+        return `${SERVER_URL}${path}`
+      }
+      return `${SERVER_URL}/static/images/trek.jpg`
     }
   }
 }

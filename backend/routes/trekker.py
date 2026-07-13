@@ -6,6 +6,26 @@ from models import db, Trek, User, Booking
 trekker_bp = Blueprint("trekker", __name__)
 
 
+@trekker_bp.route("/stats", methods=["GET"])
+@jwt_required()
+def get_stats():
+    current_user_id = get_jwt_identity()
+    user = User.query.get(current_user_id)
+    if not user or user.role != 0:
+        return jsonify({"message": "Forbidden"}), 403
+    
+    all_bookings = Booking.query.filter_by(user_id=user.id).all()
+    valid_bookings = [b for b in all_bookings if b.status in ["booked", "completed"]]
+    upcoming_treks = [b for b in valid_bookings if b.trek.status in ["open", "full", "ongoing"]]
+    completed_treks = [b for b in valid_bookings if b.trek.status == "completed"]
+    
+    return jsonify({
+        "upcoming_count": len(upcoming_treks),
+        "completed_count": len(completed_treks),
+        "total_count": len(valid_bookings)
+    }), 200
+
+
 @trekker_bp.route("/profile", methods=["GET"])
 @jwt_required()
 def get_profile():
