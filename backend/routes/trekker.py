@@ -1,3 +1,4 @@
+from datetime import datetime
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from models import db, Trek, User, Booking
@@ -39,4 +40,61 @@ def book_trek(trek_id):
     db.session.commit()
     
     return jsonify({"message": "Trek booked successfully!"}), 201
+
+
+@trekker_bp.route("/bookings", methods=["GET"])
+@jwt_required()
+def get_bookings():
+    current_user_id = get_jwt_identity()
+    user = User.query.get(current_user_id)
+    if not user or user.role != 0:
+        return jsonify({"message": "Forbidden"}), 403
+    
+    bookings = Booking.query.filter_by(user_id=user.id, status="booked").order_by(Booking.id.desc()).all()
+    result = []
+    for b in bookings:
+        result.append({
+            "id": b.id,
+            "booking_date": b.booking_date.isoformat(),
+            "trek": {
+                "id": b.trek.id,
+                "name": b.trek.name,
+                "location": b.trek.location,
+                "start_date": b.trek.start_date.isoformat(),
+                "end_date": b.trek.end_date.isoformat(),
+                "duration": (b.trek.end_date - b.trek.start_date).days + 1,
+                "difficulty": b.trek.difficulty,
+                "cover_image": b.trek.cover_image
+            }
+        })
+    return jsonify(result), 200
+
+
+@trekker_bp.route("/bookings/<int:booking_id>/cancel", methods=["POST"])
+@jwt_required()
+def cancel_booking(booking_id):
+    current_user_id = get_jwt_identity()
+    user = User.query.get(current_user_id)
+    if not user or user.role != 0:
+        return jsonify({"message": "Forbidden"}), 403
+    
+    booking = Booking.query.get_or_404(booking_id)
+    trek = booking.trek
+    
+    if booking.user_id != user.id:
+        return jsonify({"message": "You do not have permission to cancel this booking."}), 403
+    if booking.status != "booked":
+        return jsonify({"message": "This booking cannot be cancelled."}), 400
+    if trek.status in ["completed", "cancelled"]:
+        return jsonify({"message": "You cannot cancel a booking for a trek that has already concluded."}), 400
+    
+    booking.status = "cancelled"
+    booking.cancelled_date = datetime.utcnow()
+    trek.slots_available += 1
+    if trek.status == "full":
+        trek.status = "open"
+    
+    db.session.commit()
+    
+    return jsonify({"message": f"Your booking for '{trek.name}' has been successfully cancelled."}), 200
 

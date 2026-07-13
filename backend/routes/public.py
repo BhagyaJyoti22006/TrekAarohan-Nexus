@@ -55,7 +55,7 @@ def get_public_trek(trek_id):
     if current_user_id:
         user = User.query.get(current_user_id)
         if user and user.role == 0:
-            booking = Booking.query.filter_by(user_id=user.id, trek_id=trek.id).first()
+            booking = Booking.query.filter_by(user_id=user.id, trek_id=trek.id).order_by(Booking.id.desc()).first()
             if booking:
                 booking_status = booking.status
     

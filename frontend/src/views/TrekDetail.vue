@@ -70,7 +70,7 @@
           <div v-else-if="trek.booking_status === 'completed'" class="badge badge-special" style="padding: 1rem 4rem; font-size: 1.2rem;">
             🏆 Trek Completed
           </div>
-          <div v-else-if="trek.booking_status" class="badge" style="padding: 1rem 4rem; font-size: 1.2rem; background-color: var(--secondary-color); color: white;">
+          <div v-else-if="trek.booking_status === 'booked'" class="badge" style="padding: 1rem 4rem; font-size: 1.2rem; background-color: var(--secondary-color); color: white;">
             BOOKED
           </div>
           <div v-else-if="trek.status === 'full'" class="badge" style="padding: 1rem 4rem; font-size: 1.2rem; background-color: #ef4444; color: white;">
@@ -152,8 +152,7 @@ export default {
     async bookTrek() {
       try {
         await apiFetch(`/trekker/treks/${this.trek.id}/book`, { method: "POST" })
-        alert("Booking successful! Get ready for your adventure.")
-        await this.fetchTrek() // Refresh data
+        this.$router.push({ path: '/trekker/bookings', query: { message: `Successfully booked ${this.trek.name}!` } })
       } catch (err) {
         alert(err.message || "Failed to book the trek.")
       }
