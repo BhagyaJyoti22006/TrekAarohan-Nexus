@@ -149,9 +149,14 @@ export default {
       }
       return `${SERVER_URL}/static/images/trek.jpg` // Default image from backend
     },
-    bookTrek() {
-      // Simulation of booking logic
-      alert("Booking not yet implemented!")
+    async bookTrek() {
+      try {
+        await apiFetch(`/trekker/treks/${this.trek.id}/book`, { method: "POST" })
+        alert("Booking successful! Get ready for your adventure.")
+        await this.fetchTrek() // Refresh data
+      } catch (err) {
+        alert(err.message || "Failed to book the trek.")
+      }
     }
   }
 }
