@@ -1,11 +1,13 @@
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from models import Trek, User, Booking
+from cache import cache
 
 public_bp = Blueprint("public", __name__)
 
 
 @public_bp.route("/treks", methods=["GET"])
+@cache.cached(timeout=60, query_string=True)
 def get_all_open_treks():
     treks = Trek.query.filter_by(status="open").order_by(Trek.id.desc()).all()
     result = []
@@ -26,6 +28,7 @@ def get_all_open_treks():
 
 
 @public_bp.route("/treks/featured", methods=["GET"])
+@cache.cached(timeout=60, query_string=True)
 def get_featured_treks():
     treks = Trek.query.filter_by(status="open").order_by(Trek.id.desc()).limit(3).all()
     result = []

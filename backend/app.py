@@ -2,6 +2,7 @@ from flask import Flask, jsonify
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
 from models import db
+from cache import cache
 
 def create_app():
     app = Flask(__name__)
@@ -13,10 +14,15 @@ def create_app():
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
     app.config["JWT_SECRET_KEY"] = "super-secret-tan-jwt"
     
+    # Cache Configurations
+    app.config["CACHE_TYPE"] = "RedisCache"
+    app.config["CACHE_REDIS_URL"] = "redis://127.0.0.1:6379/0"
+    app.config["CACHE_DEFAULT_TIMEOUT"] = 60
+    
     # Initialize Application
     CORS(app)
     db.init_app(app)
-    
+    cache.init_app(app)
     jwt = JWTManager(app)
     
     # Register Blueprints
