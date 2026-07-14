@@ -1,8 +1,10 @@
 from flask import Flask, jsonify
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
+from celery import Celery, Task
 from models import db
 from cache import cache
+
 
 def create_app():
     app = Flask(__name__)
@@ -19,11 +21,26 @@ def create_app():
     app.config["CACHE_REDIS_URL"] = "redis://127.0.0.1:6379/0"
     app.config["CACHE_DEFAULT_TIMEOUT"] = 60
     
+    # Celery Configurations
+    app.config["CELERY_BROKER_URL"] = "redis://127.0.0.1:6379/0"
+    app.config["CELERY_RESULT_BACKEND"] = "redis://127.0.0.1:6379/0"
+    app.config["CELERY_TIMEZONE"] = "UTC"
+    
     # Initialize Application
     CORS(app)
     db.init_app(app)
     cache.init_app(app)
     jwt = JWTManager(app)
+    
+    # Initialize Celery
+    class FlaskTask(Task):
+        def __call__(self, *args, **kwargs):
+            with app.app_context():
+                return self.run(*args, **kwargs)
+    celery_app = Celery(app.name, task_cls=FlaskTask)
+    celery_app.config_from_object(app.config, namespace="CELERY")
+    celery_app.set_default()
+    app.extensions["celery"] = celery_app
     
     # Register Blueprints
     from routes.auth import auth_bp
