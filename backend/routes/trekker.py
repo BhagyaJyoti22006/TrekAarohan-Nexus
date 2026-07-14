@@ -182,6 +182,37 @@ def cancel_booking(booking_id):
     return jsonify({"message": f"Your booking for '{trek.name}' has been successfully cancelled."}), 200
 
 
+@trekker_bp.route("/history", methods=["GET"])
+@jwt_required()
+def get_history():
+    current_user_id = get_jwt_identity()
+    user = User.query.get(current_user_id)
+    if not user or user.role != 0:
+        return jsonify({"message": "Forbidden"}), 403
+    
+    historical_bookings = Booking.query.filter(
+        Booking.user_id == user.id,
+        Booking.status.in_(["completed", "cancelled"])
+    ).order_by(Booking.booking_date.desc()).all()
+    
+    result = []
+    for b in historical_bookings:
+        result.append({
+            "id": b.id,
+            "status": b.status,
+            "booking_date": b.booking_date.isoformat(),
+            "cancelled_date": b.cancelled_date.isoformat() if b.cancelled_date else None,
+            "trek": {
+                "id": b.trek.id,
+                "name": b.trek.name,
+                "location": b.trek.location,
+                "start_date": b.trek.start_date.isoformat(),
+                "end_date": b.trek.end_date.isoformat()
+            }
+        })
+    return jsonify(result), 200
+
+
 @trekker_bp.route("/available_treks", methods=["GET"])
 @jwt_required()
 def get_available_treks():
