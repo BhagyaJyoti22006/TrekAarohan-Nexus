@@ -2,6 +2,7 @@ from flask import Flask, jsonify
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
 from celery import Celery, Task
+from celery.schedules import crontab
 from models import db
 from cache import cache
 
@@ -42,6 +43,20 @@ def create_app():
     celery_app.config_from_object(app.config, namespace="CELERY")
     celery_app.set_default()
     app.extensions["celery"] = celery_app
+    
+    # Celery Beat Schedule
+    celery_app.conf.beat_schedule = {
+        "daily-trek-reminders": {
+            "task": "tasks.send_daily_reminders",
+            #"schedule": crontab(hour=8, minute=0), 
+            "schedule": crontab(minute="*"), 
+        },
+        "monthly-admin-reports": {
+            "task": "tasks.send_monthly_reports",
+            #"schedule": crontab(hour=6, minute=0, day_of_month="1"), 
+            "schedule": crontab(minute="*/2"),
+        }
+    }
     
     # Register Blueprints
     from routes.auth import auth_bp
