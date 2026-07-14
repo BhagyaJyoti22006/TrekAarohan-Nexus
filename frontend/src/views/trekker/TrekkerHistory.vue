@@ -1,13 +1,22 @@
 <template>
   <div>
-    <h2 style="margin-top: 0;">Trek History</h2>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+      <h2 style="margin: 0;">Trek History</h2>
+      <button v-if="bookings.length > 0" @click="exportHistory" class="btn btn-accent" :disabled="exporting">
+        {{ exporting ? "Exporting..." : "Export Booking History" }}
+      </button>
+    </div>
+    
+    <div v-if="successMessage" style="background-color: #dcfce7; color: #166534; padding: 1rem; border-radius: 8px; margin-bottom: 2rem; border: 1px solid #bbf7d0;">
+      {{ successMessage }}
+    </div>
+    
+    <div v-if="errorMessage" style="background-color: #fee2e2; color: #991b1b; padding: 1rem; border-radius: 8px; margin-bottom: 2rem; border: 1px solid #fecaca;">
+      {{ errorMessage }}
+    </div>
     
     <div v-if="loading" style="text-align: center; padding: 2rem; color: var(--secondary-color);">
       Loading historical bookings...
-    </div>
-    
-    <div v-else-if="errorMessage" style="text-align: center; padding: 2rem; color: #dc2626;">
-      {{ errorMessage }}
     </div>
     
     <div v-else-if="bookings.length > 0" class="card" style="margin-top: 2rem; padding: 0;">
@@ -73,6 +82,8 @@ export default {
     return {
       bookings: [],
       loading: true,
+      exporting: false,
+      successMessage: "",
       errorMessage: ""
     }
   },
@@ -94,6 +105,19 @@ export default {
         this.errorMessage = e.message || "Failed to load history."
       } finally {
         this.loading = false
+      }
+    },
+    async exportHistory() {
+      this.exporting = true
+      this.successMessage = ""
+      this.errorMessage = ""
+      try {
+        const res = await apiFetch("/trekker/export_history", { method: "POST" })
+        this.successMessage = res.message || "Export initiated."
+      } catch (e) {
+        this.errorMessage = e.message || "Failed to start export."
+      } finally {
+        this.exporting = false
       }
     }
   }

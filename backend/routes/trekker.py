@@ -240,3 +240,17 @@ def get_available_treks():
         })
     return jsonify(result), 200
 
+
+@trekker_bp.route("/export_history", methods=["POST"])
+@jwt_required()
+def export_history():
+    current_user_id = get_jwt_identity()
+    user = User.query.get(current_user_id)
+    if not user or user.role != 0:
+        return jsonify({"message": "Forbidden"}), 403
+    
+    from tasks import export_booking_history_csv
+    export_booking_history_csv.delay(current_user_id, user.email)
+    
+    return jsonify({"message": "Export initiated. You will receive an email shortly with the CSV file attached."}), 202
+
