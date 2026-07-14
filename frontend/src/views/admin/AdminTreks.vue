@@ -35,8 +35,8 @@
       </div>
       
       <div>
-        <label class="form-label">Duration</label>
-        <input type="number" v-model="filterDuration" class="form-control" placeholder="Days" min="1" style="width: 80px;">
+        <label class="form-label">Max Duration</label>
+        <input type="number" v-model="filterDuration" class="form-control" placeholder="Days" min="1" style="width: 100px;">
       </div>
       
       <div>
@@ -121,7 +121,7 @@ export default {
         const matchSearch = trek.name.toLowerCase().includes(searchLower) || trek.location.toLowerCase().includes(searchLower)
         const matchStatus = this.filterStatus === "" || trek.status === this.filterStatus
         const matchDifficulty = this.filterDifficulty === "" || trek.difficulty === this.filterDifficulty
-        const matchDuration = this.filterDuration === "" || trek.duration == this.filterDuration
+        const matchDuration = this.filterDuration === "" || trek.duration <= parseInt(this.filterDuration)
         return matchSearch && matchStatus && matchDifficulty && matchDuration
       })
     }

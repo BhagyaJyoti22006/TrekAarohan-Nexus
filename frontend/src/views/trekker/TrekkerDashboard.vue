@@ -32,12 +32,27 @@
     
     <!-- Available Treks -->
     <div style="margin-bottom: 3rem;" v-if="availableTreks">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem;">
             <h2 style="margin: 0; font-size: 1.5rem;">Available Treks</h2>
+            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; justify-content: flex-end;">
+                <input type="text" v-model="searchQuery" placeholder="Search treks or locations..." class="form-control" style="width: 200px; margin-bottom: 0;">
+                <select v-model="difficultyFilter" class="form-control" style="width: 130px; margin-bottom: 0;">
+                    <option value="">All Difficulties</option>
+                    <option value="easy">Easy</option>
+                    <option value="medium">Medium</option>
+                    <option value="hard">Hard</option>
+                </select>
+                <input type="number" v-model="maxPriceFilter" placeholder="Max ₹" class="form-control" style="width: 100px; margin-bottom: 0;" min="0">
+                <input type="number" v-model="maxDurationFilter" placeholder="Max Days" class="form-control" style="width: 100px; margin-bottom: 0;" min="1">
+                <button @click="searchQuery = ''; difficultyFilter = ''; maxPriceFilter = ''; maxDurationFilter = ''" class="btn btn-secondary">Clear</button>
+            </div>
         </div>
         
-        <div v-if="availableTreks.length > 0" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 2.5rem;">
-            <div v-for="t in availableTreks" :key="t.id" class="card" style="padding: 0; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); transition: transform 0.2s;">
+        <div v-if="availableTreks.length === 0" class="card" style="text-align: center; padding: 3rem; color: var(--secondary-color);">
+            <p style="margin: 0;">No open treks available at the moment. Check back later!</p>
+        </div>
+        <div v-else-if="filteredTreks.length > 0" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 2.5rem;">
+            <div v-for="t in filteredTreks" :key="t.id" class="card" style="padding: 0; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); transition: transform 0.2s;">
                 <div :style="{ height: '200px', backgroundImage: `url(${getCoverImageUrl(t.cover_image)})`, backgroundSize: 'cover', backgroundPosition: 'center' }"></div>
                 
                 <div style="padding: 1.5rem; display: flex; flex-direction: column; flex-grow: 1;">
@@ -57,7 +72,7 @@
             </div>
         </div>
         <div v-else class="card" style="text-align: center; padding: 3rem; color: var(--secondary-color);">
-            <p style="margin: 0;">No open treks available at the moment. Check back later!</p>
+            <p style="margin: 0;">No available treks match your search criteria.</p>
         </div>
     </div>
   </div>
@@ -75,14 +90,41 @@ export default {
       profile: {},
       stats: null,
       availableTreks: null,
-      loading: true
+      loading: true,
+      searchQuery: "",
+      difficultyFilter: "",
+      maxPriceFilter: "",
+      maxDurationFilter: ""
+    }
+  },
+  computed: {
+    filteredTreks() {
+      if (!this.availableTreks) return []
+      let filtered = this.availableTreks
+      if (this.searchQuery) {
+        const query = this.searchQuery.toLowerCase()
+        filtered = filtered.filter(t => 
+          t.name.toLowerCase().includes(query) || 
+          t.location.toLowerCase().includes(query)
+        )
+      }
+      if (this.difficultyFilter) {
+        filtered = filtered.filter(t => t.difficulty === this.difficultyFilter)
+      }
+      if (this.maxPriceFilter) {
+        filtered = filtered.filter(t => t.price <= parseFloat(this.maxPriceFilter))
+      }
+      if (this.maxDurationFilter) {
+        filtered = filtered.filter(t => t.duration <= parseInt(this.maxDurationFilter))
+      }
+      return filtered
     }
   },
   async mounted() {
     try {
       this.profile = await apiFetch("/trekker/profile")
       this.stats = await apiFetch("/trekker/dashboard")
-      this.availableTreks = await apiFetch("/treks/featured")
+      this.availableTreks = await apiFetch("/trekker/available_treks")
     } catch (e) {
       console.error(e)
     } finally {

@@ -10,8 +10,8 @@
       <div style="width: 150px;">
         <input type="number" v-model="filterMaxPrice" class="form-control" placeholder="Max Price (₹)" style="height: 100%;" min="0" step="1">
       </div>
-      <div style="width: 150px;">
-        <input type="number" v-model="filterDuration" class="form-control" placeholder="Duration (Days)" style="height: 100%;" min="1" step="1">
+      <div style="width: 130px;">
+        <input type="number" v-model="filterDuration" class="form-control" placeholder="Max Duration" style="height: 100%;" min="1" step="1">
       </div>
       <div style="width: 200px;">
         <select v-model="filterDifficulty" class="form-control" style="height: 100%;">
@@ -88,7 +88,7 @@ export default {
         const matchSearch = trek.name.toLowerCase().includes(searchLower) || trek.location.toLowerCase().includes(searchLower)
         const matchMaxPrice = this.filterMaxPrice === "" || parseFloat(trek.price) <= parseFloat(this.filterMaxPrice)
         const matchDifficulty = this.filterDifficulty === "" || trek.difficulty === this.filterDifficulty
-        const matchDuration = this.filterDuration === "" || trek.duration == this.filterDuration
+        const matchDuration = this.filterDuration === "" || trek.duration <= parseInt(this.filterDuration)
         return matchSearch && matchMaxPrice && matchDifficulty && matchDuration
       })
     }
