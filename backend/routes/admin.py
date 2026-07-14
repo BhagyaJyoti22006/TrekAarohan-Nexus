@@ -318,6 +318,9 @@ def update_trek(trek_id):
         return jsonify({"error": "Admin access required"}), 403
     
     trek = Trek.query.get_or_404(trek_id)
+    if trek.status in ["completed", "cancelled"]:
+        return jsonify({"error": "This trek has concluded and cannot be edited."}), 400
+    
     data = request.form
     
     name = data.get("name")
@@ -361,11 +364,23 @@ def update_trek(trek_id):
     trek.difficulty = difficulty
     trek.start_date = start_date
     trek.end_date = end_date
-    trek.slots_available = int(slots_available)
     trek.price = float(price)
     trek.assigned_staff_id = int(assigned_staff_id)
-    if status:
-        trek.status = status
+    
+    slots = int(slots_available)
+    new_status = status
+    if new_status:
+        if new_status == "full" or (new_status == "open" and slots <= 0):
+            new_status = "full"
+            slots = 0
+        if new_status in ["completed", "cancelled"] and trek.status not in ["completed", "cancelled"]:
+            bookings = Booking.query.filter_by(trek_id=trek.id, status="booked").all()
+            for b in bookings:
+                b.status = new_status
+                if new_status == "cancelled":
+                    b.cancelled_date = datetime.utcnow()
+        trek.status = new_status
+    trek.slots_available = slots
     
     db.session.commit()
     return jsonify({"message": "Trek updated successfully"}), 200
@@ -384,6 +399,7 @@ def get_bookings():
             "id": b.id,
             "status": b.status,
             "booking_date": b.booking_date.isoformat(),
+            "cancelled_date": b.cancelled_date.isoformat() if b.cancelled_date else None,
             "trek": {
                 "id": b.trek.id,
                 "name": b.trek.name,

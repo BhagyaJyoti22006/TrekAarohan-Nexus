@@ -13,7 +13,7 @@
       </div>
       
       <form @submit.prevent="handleSubmit">
-        <fieldset style="border: none; padding: 0; margin: 0;">
+        <fieldset :disabled="isEditMode && trek && ['completed', 'cancelled'].includes(trek.status)" style="border: none; padding: 0; margin: 0;">
           <div style="display: flex; gap: 1.5rem; margin-bottom: 1rem;">
             <div class="form-group" style="flex: 2; margin-bottom: 0;">
               <label class="form-label">Trek Name</label>
@@ -92,8 +92,10 @@
         </fieldset>
         
         <div style="display: flex; justify-content: flex-end; gap: 1rem; margin-top: 2rem;">
-          <router-link to="/admin/treks" class="btn btn-secondary">Cancel</router-link>
-          <button type="submit" class="btn btn-primary" :disabled="loading">
+          <router-link to="/admin/treks" class="btn btn-secondary">
+            {{ (isEditMode && trek && ['completed', 'cancelled'].includes(trek.status)) ? 'Back to Treks' : 'Cancel' }}
+          </router-link>
+          <button v-if="!(isEditMode && trek && ['completed', 'cancelled'].includes(trek.status))" type="submit" class="btn btn-primary" :disabled="loading">
             {{ isEditMode ? (loading ? 'Saving...' : 'Save Changes') : (loading ? 'Adding...' : 'Add Trek') }}
           </button>
         </div>
@@ -283,6 +285,8 @@ export default {
             name: "", location: "", description: "", start_date: "", end_date: "",
             difficulty: "", slots_available: 1, price: 0.0, assigned_staff_id: "", status: "open", cover_image: ""
           }
+        } else {
+          await this.fetchTrek(this.$route.params.id)
         }
         this.cover_image_file = null
       } catch (err) {

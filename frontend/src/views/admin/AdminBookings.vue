@@ -23,6 +23,8 @@
             <th>Trekker</th>
             <th>Contact</th>
             <th>Emergency</th>
+            <th>Booking Date</th>
+            <th>Cancelled Date</th>
             <th>Status</th>
             <th>Actions</th>
           </tr>
@@ -45,6 +47,19 @@
             <td>
               {{ booking.user.emergency_relation || "N/A" }}<br>
               {{ booking.user.emergency_phone || "N/A" }}
+            </td>
+            <td>
+              {{ formatDateTime(booking.booking_date).date }}<br>
+              <span style="color: var(--secondary-color); font-size: 0.85rem;">{{ formatDateTime(booking.booking_date).time }}</span>
+            </td>
+            <td>
+              <template v-if="booking.cancelled_date">
+                {{ formatDateTime(booking.cancelled_date).date }}<br>
+                <span style="color: var(--secondary-color); font-size: 0.85rem;">{{ formatDateTime(booking.cancelled_date).time }}</span>
+              </template>
+              <template v-else>
+                <span style="color: var(--secondary-color);">N/A</span>
+              </template>
             </td>
             <td>
               <span v-if="booking.status === 'booked'" class="badge badge-active">Active</span>
@@ -95,6 +110,13 @@ export default {
       if (!dateString) return ""
       const d = new Date(dateString)
       return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
+    },
+    formatDateTime(dateString) {
+      if (!dateString) return { date: "", time: "" }
+      const d = new Date(dateString)
+      const date = d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
+      const time = d.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: false })
+      return { date, time }
     },
     async fetchBookings() {
       this.loading = true

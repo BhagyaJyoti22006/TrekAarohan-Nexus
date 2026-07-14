@@ -269,13 +269,26 @@ def update_trek(trek_id):
     
     new_status = data.get("status")
     new_slots = data.get("slots_available")
-    if new_status in ["open", "full", "ongoing", "completed", "cancelled"]:
-        trek.status = new_status
+    
+    slots = trek.slots_available
     if new_slots is not None:
         try:
-            trek.slots_available = int(new_slots)
+            slots = int(new_slots)
         except ValueError:
             pass
+    
+    if new_status in ["open", "full", "ongoing", "completed", "cancelled"]:
+        if new_status == "full" or (new_status == "open" and slots <= 0):
+            new_status = "full"
+            slots = 0
+        if new_status in ["completed", "cancelled"] and trek.status not in ["completed", "cancelled"]:
+            bookings = Booking.query.filter_by(trek_id=trek.id, status="booked").all()
+            for b in bookings:
+                b.status = new_status
+                if new_status == "cancelled":
+                    b.cancelled_date = datetime.utcnow()
+        trek.status = new_status
+    trek.slots_available = slots
     
     db.session.commit()
     
