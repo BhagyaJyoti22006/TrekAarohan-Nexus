@@ -1,4 +1,6 @@
 import os
+import random
+import string
 from datetime import datetime
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt
@@ -87,8 +89,11 @@ def create_staff():
     name = data.get("name")
     email = data.get("email")
     phone = data.get("phone")
-    password = data.get("password")
     experience = data.get("experience", "")
+    
+    # Generate secure random password
+    chars = string.ascii_letters + string.digits + "!@#$%"
+    password = "".join(random.choice(chars) for _ in range(12))
     
     if not username or not email or not name or not phone:
         return jsonify({"message": "Missing required fields"}), 400
@@ -275,7 +280,7 @@ def get_trek(trek_id):
     
     trek = Trek.query.get_or_404(trek_id)
     staff = trek.staff
-    staff_completed_treks = Trek.query.filter_by(assigned_staff_id=staff.id, status='completed').count() if staff else 0
+    staff_completed_treks = Trek.query.filter_by(assigned_staff_id=staff.id, status="completed").count() if staff else 0
     
     bookings = Booking.query.filter_by(trek_id=trek.id).order_by(Booking.booking_date.desc()).all()
     serialized_bookings = []

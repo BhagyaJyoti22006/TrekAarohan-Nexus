@@ -73,30 +73,20 @@ export default {
     }
   },
   methods: {
-    // Random password generator
-    generateRandomPassword() {
-      const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%"
-      let password = ""
-      for (let i = 0; i < 12; i++) {
-        password += chars.charAt(Math.floor(Math.random() * chars.length))
-      }
-      return password
-    },
+    // Backend handles the actual Celery task for welcome emails
     async handleCreateStaff() {
       this.error = null
       this.success = null
       this.loading = true
-      const generatedPassword = this.generateRandomPassword()
       const payload = {
-        ...this.form,
-        password: generatedPassword
+        ...this.form
       }
       try {
         const data = await apiFetch("/admin/staffs", {
           method: "POST",
           body: JSON.stringify(payload)
         })
-        this.success = "Staff account created successfully! The credentials have been emailed to them."
+        this.success = "Staff account created successfully! The credentials have been securely emailed to them."
         this.form = { username: "", name: "", email: "", phone: "", experience: "" }
       } catch (err) {
         this.error = err.message
