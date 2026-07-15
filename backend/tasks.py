@@ -23,7 +23,7 @@ def export_booking_history_csv(user_id, user_email):
     # Generate CSV file
     with open(filename, "w", newline="", encoding="utf-8") as f:
         writer = csv.writer(f)
-        writer.writerow(["Booking ID", "Trek ID", "Trek Name", "Location", "Start Date", "End Date", "Duration", "Booking Date", "Cancelled Date", "Booking Status"])
+        writer.writerow(["Booking ID", "Trek ID", "Trek Name", "Trek Status", "Location", "Start Date", "End Date", "Duration", "Booking Date", "Cancelled Date", "Booking Status"])
         for b in bookings:
             duration = (b.trek.end_date - b.trek.start_date).days + 1
             cancelled_date = b.cancelled_date.strftime("%Y-%m-%d") if b.cancelled_date else ""
@@ -31,6 +31,7 @@ def export_booking_history_csv(user_id, user_email):
                 b.id,
                 b.trek.id,
                 b.trek.name,
+                b.trek.status,
                 b.trek.location,
                 b.trek.start_date.strftime("%Y-%m-%d"),
                 b.trek.end_date.strftime("%Y-%m-%d"),
@@ -129,6 +130,12 @@ def send_monthly_reports():
     current_month = datetime.utcnow().strftime("%B %Y")
     admin = User.query.filter_by(role=2).first()
     
+    # Query popular treks (100% participation)
+    popular_treks = Trek.query.filter(Trek.slots_available == 0, Trek.status != "cancelled").all()
+    popular_treks_html = "".join([f"<li style='margin-bottom: 8px;'><strong>{t.name}</strong> ({t.location})</li>" for t in popular_treks])
+    if not popular_treks_html:
+        popular_treks_html = "<li>No fully booked treks at the moment.</li>"
+    
     # Construct HTML Report Body
     html_body = f"""
     <div style="font-family: system-ui, -apple-system, sans-serif; background-color: #f7fafc; padding: 2rem;">
@@ -162,6 +169,10 @@ def send_monthly_reports():
             </tr>
           </tbody>
         </table>
+        <h4 style="color: #1A202C; margin-top: 2rem; margin-bottom: 0.5rem;">Popular Treks (100% Participation)</h4>
+        <ul style="color: #4A5568; font-size: 15px; line-height: 1.6; background-color: #FFFBEB; border-left: 4px solid #D97706; padding: 1.5rem 1.5rem 1.5rem 2.5rem; border-radius: 6px; margin: 1rem 0;">
+            {popular_treks_html}
+        </ul>
         <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0;" />
         <p style="color: #718096; font-size: 12px; text-align: center;">This is an automated message from TrekAarohan-Nexus.</p>
       </div>
