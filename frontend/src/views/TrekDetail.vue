@@ -128,8 +128,8 @@ export default {
         const data = await apiFetch(`/treks/${id}`, { method: "GET" })
         this.trek = data
       } catch (err) {
-        this.error = "Failed to load trek details."
-        console.error(err)
+        console.error("Failed to load trek:", err)
+        this.$router.push("/404")
       } finally {
         this.loading = false
       }

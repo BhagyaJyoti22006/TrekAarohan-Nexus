@@ -104,6 +104,34 @@ def update_profile():
     return jsonify({"message": "Profile updated successfully."}), 200
 
 
+@trekker_bp.route("/available_treks", methods=["GET"])
+@jwt_required()
+def get_available_treks():
+    current_user_id = get_jwt_identity()
+    user = User.query.get(current_user_id)
+    if not user or user.role != 0:
+        return jsonify({"message": "Forbidden"}), 403
+    
+    open_treks = Trek.query.filter_by(status="open").order_by(Trek.start_date.asc()).all()
+    booked_trek_ids = [b.trek_id for b in user.bookings if b.status == "booked"]
+    unbooked = [t for t in open_treks if t.id not in booked_trek_ids]
+    
+    result = []
+    for t in unbooked:
+        result.append({
+            "id": t.id,
+            "name": t.name,
+            "location": t.location,
+            "start_date": t.start_date.isoformat(),
+            "end_date": t.end_date.isoformat(),
+            "duration": (t.end_date - t.start_date).days + 1,
+            "difficulty": t.difficulty,
+            "price": t.price,
+            "cover_image": t.cover_image
+        })
+    return jsonify(result), 200
+
+
 @trekker_bp.route("/treks/<int:trek_id>/book", methods=["POST"])
 @jwt_required()
 def book_trek(trek_id):
@@ -224,34 +252,6 @@ def get_history():
                 "start_date": b.trek.start_date.isoformat(),
                 "end_date": b.trek.end_date.isoformat()
             }
-        })
-    return jsonify(result), 200
-
-
-@trekker_bp.route("/available_treks", methods=["GET"])
-@jwt_required()
-def get_available_treks():
-    current_user_id = get_jwt_identity()
-    user = User.query.get(current_user_id)
-    if not user or user.role != 0:
-        return jsonify({"message": "Forbidden"}), 403
-    
-    open_treks = Trek.query.filter_by(status="open").order_by(Trek.start_date.asc()).all()
-    booked_trek_ids = [b.trek_id for b in user.bookings if b.status == "booked"]
-    unbooked = [t for t in open_treks if t.id not in booked_trek_ids]
-    
-    result = []
-    for t in unbooked:
-        result.append({
-            "id": t.id,
-            "name": t.name,
-            "location": t.location,
-            "start_date": t.start_date.isoformat(),
-            "end_date": t.end_date.isoformat(),
-            "duration": (t.end_date - t.start_date).days + 1,
-            "difficulty": t.difficulty,
-            "price": t.price,
-            "cover_image": t.cover_image
         })
     return jsonify(result), 200
 

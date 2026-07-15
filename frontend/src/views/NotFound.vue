@@ -1,0 +1,19 @@
+<template>
+  <div class="container" style="min-height: 70vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;">
+    <h1 style="font-size: 6rem; color: var(--primary-color); margin-bottom: 0;">404</h1>
+    <h2 style="font-size: 2rem; color: var(--text-color); margin-bottom: 1.5rem;">Lost in the Woods?</h2>
+    <p style="font-size: 1.1rem; color: #64748b; margin-bottom: 2rem; max-width: 500px;">
+      We couldn't find the trail you're looking for. It might have been removed, had its name changed, or is temporarily unavailable.
+    </p>
+    
+    <router-link to="/" class="btn btn-primary" style="padding: 1rem 3rem; font-size: 1.1rem; display: inline-flex; align-items: center; gap: 0.5rem;">
+      🏕️ Return to Basecamp
+    </router-link>
+  </div>
+</template>
+
+<script>
+export default {
+  name: "NotFound"
+}
+</script>

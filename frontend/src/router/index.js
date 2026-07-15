@@ -8,6 +8,7 @@ import PublicFooter from "../views/PublicFooter.vue"
 import TrekDetail from "../views/TrekDetail.vue"
 import Login from "../views/Login.vue"
 import Register from "../views/Register.vue"
+import NotFound from "../views/NotFound.vue"
 
 import AdminLayout from "../views/admin/AdminLayout.vue"
 import AdminDashboard from "../views/admin/AdminDashboard.vue"
@@ -76,6 +77,11 @@ const routes = [
       { path: "history", component: TrekkerHistory },
       { path: "profile", component: TrekkerProfile }
     ]
+  },
+  {
+    path: "/:pathMatch(.*)*",
+    name: "NotFound",
+    component: NotFound
   }
 ]
 
