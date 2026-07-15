@@ -1,6 +1,7 @@
 from datetime import datetime
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import jwt_required, get_jwt_identity
+from werkzeug.security import check_password_hash, generate_password_hash
 from models import db, Trek, User, Booking
 
 staff_bp = Blueprint("staff", __name__)
@@ -87,6 +88,20 @@ def update_profile():
     emergency_relation = data.get("emergency_relation")
     experience = data.get("experience")
     
+    old_password = data.get("old_password")
+    new_password = data.get("new_password")
+    
+    if new_password:
+        if not old_password:
+            return jsonify({"message": "Old password is required to change password."}), 400
+        if not check_password_hash(user.password, old_password):
+            return jsonify({"message": "Incorrect old password."}), 400
+    
+    if not emergency_phone:
+        emergency_phone = None
+    if not emergency_relation:
+        emergency_relation = None
+    
     if not name or not phone or not email:
         return jsonify({"message": "Name, Email, and Phone number are required."}), 400
     
@@ -107,6 +122,9 @@ def update_profile():
     user.emergency_phone = emergency_phone
     user.emergency_relation = emergency_relation
     user.experience = experience
+    
+    if new_password:
+        user.password = generate_password_hash(new_password)
     
     db.session.commit()
     

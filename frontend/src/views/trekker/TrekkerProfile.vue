@@ -49,6 +49,20 @@
           <input type="text" id="emergency_relation" v-model="profile.emergency_relation" class="form-control" placeholder="e.g., Spouse, Parent, Sibling">
         </div>
         
+        <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 0.5rem 0;">
+        <h3 style="margin: 0; color: #f59e0b;">Change Password</h3>
+        <p style="color: var(--secondary-color); margin-top: 0; font-size: 0.9rem;">Leave blank if you do not wish to change your password.</p>
+        
+        <div class="form-group">
+          <label for="old_password">Current Password</label>
+          <input type="password" id="old_password" v-model="profile.old_password" class="form-control">
+        </div>
+        
+        <div class="form-group">
+          <label for="new_password">New Password</label>
+          <input type="password" id="new_password" v-model="profile.new_password" class="form-control">
+        </div>
+        
         <div style="margin-top: 0.5rem;">
           <button type="submit" class="btn btn-primary" :disabled="saving" style="padding: 0.75rem 2rem; font-size: 1.1rem;">
             {{ saving ? "Saving..." : "Save Changes" }}
@@ -76,7 +90,9 @@ export default {
         name: "",
         phone: "",
         emergency_phone: "",
-        emergency_relation: ""
+        emergency_relation: "",
+        old_password: "",
+        new_password: ""
       },
       loading: true,
       saving: false,
@@ -111,10 +127,14 @@ export default {
             name: this.profile.name,
             phone: this.profile.phone,
             emergency_phone: this.profile.emergency_phone,
-            emergency_relation: this.profile.emergency_relation
+            emergency_relation: this.profile.emergency_relation,
+            old_password: this.profile.old_password,
+            new_password: this.profile.new_password
           })
         })
         this.successMessage = res.message || "Profile updated successfully."
+        this.profile.old_password = ""
+        this.profile.new_password = ""
         document.querySelector('.card').scrollIntoView({ behavior: 'smooth' })
       } catch (err) {
         this.errorMessage = err.message || "Failed to update profile."
