@@ -82,17 +82,6 @@ export default {
       }
       return password
     },
-    
-    // Simulation for Celery/Mailhog welcome mail to staff
-    sendWelcomeEmail(username, password, email) {
-      console.log("====================================")
-      console.log("FUTURE CELERY TASK: SEND_WELCOME_EMAIL")
-      console.log(`To: ${email}`)
-      console.log(`Username: ${username}`)
-      console.log(`Password: ${password}`)
-      console.log("====================================")
-    },
-    
     async handleCreateStaff() {
       this.error = null
       this.success = null
@@ -107,7 +96,6 @@ export default {
           method: "POST",
           body: JSON.stringify(payload)
         })
-        this.sendWelcomeEmail(this.form.username, generatedPassword, this.form.email)
         this.success = "Staff account created successfully! The credentials have been emailed to them."
         this.form = { username: "", name: "", email: "", phone: "", experience: "" }
       } catch (err) {

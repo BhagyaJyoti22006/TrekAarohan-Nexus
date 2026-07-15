@@ -1,9 +1,11 @@
 import os
 import csv
 from datetime import datetime, timedelta
-from celery import shared_task
 from app import create_app
 from models import db, Booking, User, Trek
+from celery import shared_task
+from flask_mail import Message
+from mail import mail
 
 
 @shared_task(ignore_result=False)
@@ -38,12 +40,25 @@ def export_booking_history_csv(user_id, user_email):
                 b.status
             ])
     
-    # Mock Email Output
-    print(f"--- [MOCK EMAIL SENT] ---")
-    print(f"To: {user_email}")
-    print(f"Subject: Your Booking History Export")
-    print(f"Attachment: booking_history_{user_id}.csv")
-    print(f"Message: Hi {user_name}, your booking history containing {len(bookings)} records has been exported successfully!")
+    # Send Email with attachment
+    msg = Message("Your Booking History Export", recipients=[user_email])
+    html_body = f"""
+    <div style="font-family: system-ui, -apple-system, sans-serif; background-color: #f7fafc; padding: 2rem;">
+      <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 2rem; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+        <h2 style="color: #2C5E3B; margin-top: 0;">TrekAarohan-Nexus</h2>
+        <h3 style="color: #1A202C;">Booking History Export</h3>
+        <p style="color: #4A5568; font-size: 16px; line-height: 1.5;">Hi <strong>{user_name}</strong>,</p>
+        <p style="color: #4A5568; font-size: 16px; line-height: 1.5;">Your requested booking history containing <strong>{len(bookings)}</strong> records has been successfully exported.</p>
+        <p style="color: #4A5568; font-size: 16px; line-height: 1.5;">Please find the CSV file securely attached to this email.</p>
+        <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0;" />
+        <p style="color: #718096; font-size: 12px; text-align: center;">This is an automated message from TrekAarohan-Nexus.</p>
+      </div>
+    </div>
+    """
+    msg.html = html_body
+    with open(filename, "rb") as fp:
+        msg.attach(os.path.basename(filename), "text/csv", fp.read())
+    mail.send(msg)
     
     return f"Export completed for {user_email}. File saved as {filename}"
 
@@ -69,16 +84,36 @@ def send_daily_reminders():
                 "upcoming_treks": upcoming_treks
             })
     
-    # Mock Email Output
+    # Execute mailing logic atomically
     emails_sent = 0
     for data in email_queue:
-        print(f"--- [MOCK EMAIL SENT] ---")
-        print(f"To: {data['email']}")
-        print(f"Subject: Reminder: Your Upcoming Treks")
-        trek_details = ""
+        msg = Message("Reminder: Your Upcoming Treks", recipients=[data["email"]])
+        trek_details_html = ""
         for t in data["upcoming_treks"]:
-            trek_details += f"\n - {t['name']} at {t['location']} starting on {t['start_date']}"
-        print(f"Message: Hi {data['name']}, here is a reminder of your upcoming treks:{trek_details}")
+            trek_details_html += f'''
+            <li style="margin-bottom: 12px;">
+                <strong style="color: #1A202C;">{t['name']}</strong> at {t['location']} <br/>
+                <span style="color: #718096; font-size: 14px;">Starting on: {t['start_date']}</span>
+            </li>
+            '''
+        html_body = f"""
+        <div style="font-family: system-ui, -apple-system, sans-serif; background-color: #f7fafc; padding: 2rem;">
+          <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 2rem; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+            <h2 style="color: #2C5E3B; margin-top: 0;">TrekAarohan-Nexus</h2>
+            <h3 style="color: #1A202C;">Upcoming Trek Reminder</h3>
+            <p style="color: #4A5568; font-size: 16px; line-height: 1.5;">Hi <strong>{data['name']}</strong>,</p>
+            <p style="color: #4A5568; font-size: 16px; line-height: 1.5;">Get your gear ready! Here is a quick reminder of your upcoming treks:</p>
+            <ul style="color: #4A5568; font-size: 16px; line-height: 1.5; background-color: #FFFBEB; border-left: 4px solid #D97706; padding: 1.5rem 1.5rem 1.5rem 2.5rem; border-radius: 6px; margin: 1.5rem 0;">
+                {trek_details_html}
+            </ul>
+            <p style="color: #4A5568; font-size: 16px; line-height: 1.5;">We can't wait to see you on the trail!</p>
+            <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0;" />
+            <p style="color: #718096; font-size: 12px; text-align: center;">This is an automated message from TrekAarohan-Nexus.</p>
+          </div>
+        </div>
+        """
+        msg.html = html_body
+        mail.send(msg)
         emails_sent += 1
     
     return f"Sent {emails_sent} daily reminder emails for upcoming treks."
@@ -96,26 +131,75 @@ def send_monthly_reports():
     
     # Construct HTML Report Body
     html_body = f"""
-    <html>
-      <body style="font-family: Arial, sans-serif; color: #333;">
-        <h2>Monthly Admin Report - {current_month}</h2>
-        <table border="1" cellpadding="10" cellspacing="0" style="border-collapse: collapse;">
-          <tr style="background-color: #f8f9fa;"><th>Metric</th><th>Count</th></tr>
-          <tr><td>Total Treks</td><td>{total_treks}</td></tr>
-          <tr><td>Active Bookings</td><td>{active_bookings}</td></tr>
-          <tr><td>Total Trekkers</td><td>{total_trekkers}</td></tr>
-          <tr><td>Total Staffs</td><td>{total_staffs}</td></tr>
+    <div style="font-family: system-ui, -apple-system, sans-serif; background-color: #f7fafc; padding: 2rem;">
+      <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 2rem; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+        <h2 style="color: #2C5E3B; margin-top: 0;">TrekAarohan-Nexus</h2>
+        <h3 style="color: #1A202C;">Monthly Platform Report</h3>
+        <p style="color: #4A5568; font-size: 16px; line-height: 1.5;">Here are the latest statistics for <strong>{current_month}</strong>:</p>
+        <table style="width: 100%; border-collapse: collapse; margin-top: 1.5rem; margin-bottom: 1.5rem;">
+          <thead>
+            <tr>
+                <th style="background-color: #edf2f7; color: #4A5568; padding: 12px; text-align: left; border-bottom: 2px solid #cbd5e0; border-top-left-radius: 6px;">Metric</th>
+                <th style="background-color: #edf2f7; color: #4A5568; padding: 12px; text-align: right; border-bottom: 2px solid #cbd5e0; border-top-right-radius: 6px;">Count</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+                <td style="padding: 12px; border-bottom: 1px solid #e2e8f0; color: #1A202C;">Total Treks</td>
+                <td style="padding: 12px; border-bottom: 1px solid #e2e8f0; color: #1A202C; text-align: right; font-weight: bold;">{total_treks}</td>
+            </tr>
+            <tr>
+                <td style="padding: 12px; border-bottom: 1px solid #e2e8f0; color: #1A202C;">Active Bookings</td>
+                <td style="padding: 12px; border-bottom: 1px solid #e2e8f0; color: #1A202C; text-align: right; font-weight: bold;">{active_bookings}</td>
+            </tr>
+            <tr>
+                <td style="padding: 12px; border-bottom: 1px solid #e2e8f0; color: #1A202C;">Total Trekkers</td>
+                <td style="padding: 12px; border-bottom: 1px solid #e2e8f0; color: #1A202C; text-align: right; font-weight: bold;">{total_trekkers}</td>
+            </tr>
+            <tr>
+                <td style="padding: 12px; border-bottom: 1px solid #e2e8f0; color: #1A202C;">Total Staff</td>
+                <td style="padding: 12px; border-bottom: 1px solid #e2e8f0; color: #1A202C; text-align: right; font-weight: bold;">{total_staffs}</td>
+            </tr>
+          </tbody>
         </table>
-        <p>This is an automatically generated report by TrekAarohan-Nexus.</p>
-      </body>
-    </html>
+        <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0;" />
+        <p style="color: #718096; font-size: 12px; text-align: center;">This is an automated message from TrekAarohan-Nexus.</p>
+      </div>
+    </div>
     """
     
-    # Mock Email Output
-    print(f"--- [MOCK HTML EMAIL SENT] ---")
-    print(f"To: {admin.email}")
-    print(f"Subject: Monthly Platform Report")
-    print(f"Body: \n{html_body}")
+    # Send Email
+    msg = Message("Monthly Platform Report", recipients=[admin.email])
+    msg.html = html_body
+    mail.send(msg)
     
     return f"Sent monthly report to admin ({admin.email})."
+
+
+@shared_task(ignore_result=False)
+def send_staff_welcome_email(staff_email, staff_name, staff_username, password):
+    msg = Message("Welcome to TrekAarohan-Nexus Staff", recipients=[staff_email])
+    
+    html_body = f"""
+    <div style="font-family: system-ui, -apple-system, sans-serif; background-color: #f7fafc; padding: 2rem;">
+      <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 2rem; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+        <h2 style="color: #2C5E3B; margin-top: 0;">TrekAarohan-Nexus</h2>
+        <h3 style="color: #1A202C;">Welcome to the Team!</h3>
+        <p style="color: #4A5568; font-size: 16px; line-height: 1.5;">Hi <strong>{staff_name}</strong>,</p>
+        <p style="color: #4A5568; font-size: 16px; line-height: 1.5;">Your staff account was successfully registered. Here are your login credentials:</p>
+        <div style="background-color: #FFFBEB; border-left: 4px solid #D97706; padding: 1.5rem; border-radius: 6px; margin: 1.5rem 0;">
+            <p style="margin: 0 0 10px 0; color: #1A202C; font-size: 15px;"><strong>Username:</strong> {staff_username}</p>
+            <p style="margin: 0 0 10px 0; color: #1A202C; font-size: 15px;"><strong>Email:</strong> {staff_email}</p>
+            <p style="margin: 0; color: #1A202C; font-size: 15px;"><strong>Password:</strong> <span style="font-family: monospace; background-color: #FDE68A; padding: 2px 6px; border-radius: 4px;">{password}</span></p>
+        </div>
+        <p style="color: #4A5568; font-size: 16px; line-height: 1.5;">Please log in as soon as possible and update your profile details if necessary.</p>
+        <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 2rem 0;" />
+        <p style="color: #718096; font-size: 12px; text-align: center;">This is an automated message from TrekAarohan-Nexus.</p>
+      </div>
+    </div>
+    """
+    msg.html = html_body
+    mail.send(msg)
+    
+    return f"Sent welcome email to new staff: {staff_email}"
 

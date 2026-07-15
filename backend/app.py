@@ -5,6 +5,7 @@ from celery import Celery, Task
 from celery.schedules import crontab
 from models import db
 from cache import cache
+from mail import mail
 
 
 def create_app():
@@ -28,11 +29,19 @@ def create_app():
     app.config["CELERY_TIMEZONE"] = "UTC"
     app.config["CELERY_IMPORTS"] = ["tasks"]
     
+    # MailHog Configurations
+    app.config["MAIL_SERVER"] = "127.0.0.1"
+    app.config["MAIL_PORT"] = 1025
+    app.config["MAIL_USE_TLS"] = False
+    app.config["MAIL_USE_SSL"] = False
+    app.config["MAIL_DEFAULT_SENDER"] = "system@tan.com"
+    
     # Initialize Application
     CORS(app)
+    jwt = JWTManager(app)
     db.init_app(app)
     cache.init_app(app)
-    jwt = JWTManager(app)
+    mail.init_app(app)
     
     # Initialize Celery
     class FlaskTask(Task):

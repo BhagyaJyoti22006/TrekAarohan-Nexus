@@ -115,6 +115,10 @@ def create_staff():
     db.session.add(new_staff)
     db.session.commit()
     
+    # Dispatch async email to staff
+    from tasks import send_staff_welcome_email
+    send_staff_welcome_email.delay(email, name, username, password)
+    
     return jsonify({"message": "Staff created successfully"}), 201
 
 

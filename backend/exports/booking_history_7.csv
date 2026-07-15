@@ -15,4 +15,4 @@ Booking ID,Trek ID,Trek Name,Location,Start Date,End Date,Duration,Booking Date,
 23,12,asaS,As,2026-07-10,2026-07-11,2,2026-07-13,2026-07-13,cancelled
 24,12,asaS,As,2026-07-10,2026-07-11,2,2026-07-13,,completed
 25,4,dfsdf,sdf,2026-07-04,2026-07-24,21,2026-07-13,,booked
-26,8,LOHGAD,asdasd,2026-08-15,2026-08-22,8,2026-07-13,,booked
+26,8,LOHGAD,asdasd,2026-07-15,2026-08-22,39,2026-07-13,,booked
