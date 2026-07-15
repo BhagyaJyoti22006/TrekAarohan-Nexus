@@ -9,7 +9,7 @@
       <div v-if="success" style="padding: 0.75rem; margin-bottom: 1rem; border-radius: 6px; background-color: #dcfce7; color: #166534;">
         {{ success }}
       </div>
-
+      
       <form @submit.prevent="handleRegister" v-if="!success">
         <div class="form-group">
           <label class="form-label">Username</label>
@@ -31,7 +31,6 @@
           <label class="form-label">Password</label>
           <input type="password" v-model="form.password" class="form-control" required>
         </div>
-        <!-- Role selection removed: Staff cannot self-register -->
         <button type="submit" class="btn btn-accent" style="width: 100%; padding: 1rem; font-size: 1rem;" :disabled="loading">
           {{ loading ? "Creating..." : "Create Account" }}
         </button>

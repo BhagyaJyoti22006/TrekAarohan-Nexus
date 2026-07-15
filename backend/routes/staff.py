@@ -87,7 +87,6 @@ def update_profile():
     emergency_phone = data.get("emergency_phone")
     emergency_relation = data.get("emergency_relation")
     experience = data.get("experience")
-    
     old_password = data.get("old_password")
     new_password = data.get("new_password")
     
@@ -101,17 +100,15 @@ def update_profile():
         emergency_phone = None
     if not emergency_relation:
         emergency_relation = None
-    
     if not name or not phone or not email:
         return jsonify({"message": "Name, Email, and Phone number are required."}), 400
-    
     try:
         int(phone)
         if emergency_phone:
             int(emergency_phone)
     except (ValueError, TypeError):
         return jsonify({"message": "Phone numbers must be valid numbers."}), 400
-        
+    
     existing_user = User.query.filter(User.email == email, User.id != current_user_id).first()
     if existing_user:
         return jsonify({"message": "Email is already registered by another user."}), 400
@@ -122,7 +119,6 @@ def update_profile():
     user.emergency_phone = emergency_phone
     user.emergency_relation = emergency_relation
     user.experience = experience
-    
     if new_password:
         user.password = generate_password_hash(new_password)
     

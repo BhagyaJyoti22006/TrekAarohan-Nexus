@@ -3,6 +3,7 @@ from flask import Blueprint, jsonify, request
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from werkzeug.security import check_password_hash, generate_password_hash
 from models import db, Trek, User, Booking
+from tasks import export_booking_history_csv
 
 trekker_bp = Blueprint("trekker", __name__)
 
@@ -64,7 +65,6 @@ def update_profile():
     phone = data.get("phone")
     emergency_phone = data.get("emergency_phone")
     emergency_relation = data.get("emergency_relation")
-    
     old_password = data.get("old_password")
     new_password = data.get("new_password")
     
@@ -78,10 +78,8 @@ def update_profile():
         emergency_phone = None
     if not emergency_relation:
         emergency_relation = None
-    
     if not name or not phone or not email:
         return jsonify({"message": "Name, Email, and Phone number are required."}), 400
-    
     try:
         int(phone)
         if emergency_phone:
@@ -98,7 +96,6 @@ def update_profile():
     user.phone = phone
     user.emergency_phone = emergency_phone
     user.emergency_relation = emergency_relation
-    
     if new_password:
         user.password = generate_password_hash(new_password)
     
@@ -123,7 +120,7 @@ def book_trek(trek_id):
         return jsonify({"message": "This trek is no longer open for booking."}), 400
     if not user.name or not user.phone or not user.email:
         return jsonify({"message": "Name, Email, and Phone number are required."}), 400
-        
+    
     existing_booking = Booking.query.filter_by(user_id=user.id, trek_id=trek.id, status="booked").first()
     if existing_booking:
         return jsonify({"message": "You have already booked this trek."}), 400
@@ -267,8 +264,6 @@ def export_history():
     if not user or user.role != 0:
         return jsonify({"message": "Forbidden"}), 403
     
-    from tasks import export_booking_history_csv
     export_booking_history_csv.delay(current_user_id, user.email)
-    
     return jsonify({"message": "Export initiated. You will receive an email shortly with the CSV file attached."}), 202
 

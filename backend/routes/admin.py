@@ -7,6 +7,7 @@ from flask_jwt_extended import jwt_required, get_jwt
 from werkzeug.security import generate_password_hash
 from werkzeug.utils import secure_filename
 from models import db, User, Trek, Booking
+from tasks import send_staff_welcome_email
 
 admin_bp = Blueprint("admin", __name__)
 
@@ -27,7 +28,6 @@ def get_dashboard():
     active_bookings = Booking.query.filter_by(status="booked").count()
     total_trekkers = User.query.filter_by(role=0).count()
     total_staffs = User.query.filter_by(role=1).count()
-    
     users = User.query.order_by(User.id.desc()).all()
     
     serialized_users = []
@@ -75,6 +75,7 @@ def get_staffs():
         })
     return jsonify(staff_list), 200
 
+
 @admin_bp.route("/staffs", methods=["POST"])
 @jwt_required()
 def create_staff():
@@ -97,12 +98,10 @@ def create_staff():
     
     if not username or not email or not name or not phone:
         return jsonify({"message": "Missing required fields"}), 400
-    
     try:
         int(phone)
     except (ValueError, TypeError):
         return jsonify({"message": "Phone number must be a valid number."}), 400
-        
     if User.query.filter_by(username=username).first():
         return jsonify({"error": "Username already exists"}), 400
     if User.query.filter_by(email=email).first():
@@ -121,7 +120,6 @@ def create_staff():
     db.session.commit()
     
     # Dispatch async email to staff
-    from tasks import send_staff_welcome_email
     send_staff_welcome_email.delay(email, name, username, password)
     
     return jsonify({"message": "Staff created successfully"}), 201
@@ -217,7 +215,6 @@ def create_trek():
         return jsonify({"error": "Admin access required"}), 403
     
     data = request.form
-    
     name = data.get("name")
     location = data.get("location")
     description = data.get("description", "")
@@ -331,7 +328,6 @@ def update_trek(trek_id):
         return jsonify({"error": "This trek has concluded and cannot be edited."}), 400
     
     data = request.form
-    
     name = data.get("name")
     location = data.get("location")
     description = data.get("description", "")

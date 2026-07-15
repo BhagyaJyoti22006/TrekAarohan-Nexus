@@ -11,7 +11,7 @@
         <div>
             <strong>Action Required:</strong> Please complete your emergency contact information before your next trek.
         </div>
-        <router-link to="/trekker/profile" class="btn btn-primary" style="padding: 0.4rem 1rem; background-color: #991b1b; color: white; border: none;">Update Profile</router-link>
+        <router-link to="/trekker/profile" class="btn btn-danger" style="padding: 0.4rem 1rem;">Update Profile</router-link>
     </div>
     
     <!-- Quick Stats -->
@@ -24,9 +24,9 @@
             <h3 style="color: var(--secondary-color); font-size: 1rem; margin-top: 0;">Completed Treks</h3>
             <p style="font-size: 2.5rem; font-weight: bold; margin: 0; color: var(--primary-color);">{{ stats.completed_count }}</p>
         </div>
-        <div class="card" style="text-align: center; border-top: 4px solid var(--text-color);">
+        <div class="card" style="text-align: center; border-top: 4px solid var(--secondary-color);">
             <h3 style="color: var(--secondary-color); font-size: 1rem; margin-top: 0;">Total Bookings</h3>
-            <p style="font-size: 2.5rem; font-weight: bold; margin: 0; color: var(--text-color);">{{ stats.total_count }}</p>
+            <p style="font-size: 2.5rem; font-weight: bold; margin: 0; color: var(--secondary-color);">{{ stats.total_count }}</p>
         </div>
     </div>
     

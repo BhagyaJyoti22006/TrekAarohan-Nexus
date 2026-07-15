@@ -106,13 +106,13 @@
       <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; padding-bottom: 0.5rem; margin-bottom: 1.5rem;">
         <h3 style="margin: 0; color: var(--text-color);">Participant Roster</h3>
         
-        <span v-if="['completed', 'cancelled'].includes(trek.status)" class="badge" style="font-size: 1rem; padding: 0.5rem 1rem; background-color: var(--secondary-color); color: white; border: 1px solid var(--secondary-color);">
+        <span v-if="['completed', 'cancelled'].includes(trek.status)" class="badge badge-completed" style="font-size: 1rem; padding: 0.5rem 1rem;">
           Concluded
         </span>
-        <span v-else-if="trek.slots_available === 0" class="badge" style="font-size: 1rem; padding: 0.5rem 1rem; background-color: var(--accent-color); color: white; border: 1px solid var(--accent-color);">
+        <span v-else-if="trek.slots_available === 0" class="badge badge-full" style="font-size: 1rem; padding: 0.5rem 1rem;">
           All {{ bookedCount + trek.slots_available }} Slots Booked
         </span>
-        <span v-else class="badge" style="font-size: 1rem; padding: 0.5rem 1rem; background-color: #FEF3C7; color: var(--accent-color); border: 1px solid var(--accent-color);">
+        <span v-else class="badge badge-pending" style="font-size: 1rem; padding: 0.5rem 1rem;">
           {{ bookedCount }} / {{ bookedCount + trek.slots_available }} Slots Booked
         </span>
       </div>

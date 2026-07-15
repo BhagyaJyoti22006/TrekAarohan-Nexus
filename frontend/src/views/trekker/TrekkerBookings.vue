@@ -87,7 +87,7 @@ export default {
         try {
           const res = await apiFetch(`/trekker/bookings/${booking.id}/cancel`, { method: "POST" })
           this.successMessage = res.message || `Successfully cancelled booking for ${booking.trek.name}.`
-          await this.fetchBookings() // Refresh list
+          await this.fetchBookings()
         } catch (err) {
           alert(err.message || "Failed to cancel booking.")
         }
@@ -106,7 +106,7 @@ export default {
       if (path) {
         return `${SERVER_URL}${path}`
       }
-      return `${SERVER_URL}/static/images/trek.jpg` // Default image from backend
+      return `${SERVER_URL}/static/images/trek.jpg`
     }
   }
 }

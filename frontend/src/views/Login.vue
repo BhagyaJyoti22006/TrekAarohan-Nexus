@@ -6,7 +6,7 @@
       <div v-if="error" style="padding: 0.75rem; margin-bottom: 1rem; border-radius: 6px; background-color: #fee2e2; color: #991b1b;">
         {{ error }}
       </div>
-
+      
       <form @submit.prevent="handleLogin">
         <div class="form-group">
           <label class="form-label">Username</label>
@@ -43,7 +43,6 @@ export default {
     async handleLogin() {
       this.error = null
       this.loading = true
-      
       try {
         const data = await apiFetch("/auth/login", {
           method: "POST",
@@ -52,12 +51,9 @@ export default {
             password: this.password
           })
         })
-        
         const roleMap = {0: "trekker", 1: "staff", 2: "admin"}
         const roleName = roleMap[data.user.role] || "trekker"
-        
         authStore.login(data.access_token, roleName, data.user.username)
-        
         // Redirect based on role
         if (roleName === "admin") this.$router.push("/admin")
         else if (roleName === "staff") this.$router.push("/staff")

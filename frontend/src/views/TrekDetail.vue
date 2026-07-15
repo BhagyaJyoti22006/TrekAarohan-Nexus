@@ -64,13 +64,13 @@
         <!-- Call to Action -->
         <div style="margin-top: 4rem; padding-top: 2rem; border-top: 1px solid var(--border-color); text-align: center;">
           <router-link v-if="!isAuthenticated" to="/login" class="btn btn-primary" style="padding: 1rem 4rem; font-size: 1.2rem;">Log in to Book</router-link>
-          <div v-else-if="userRole !== 'trekker'" class="badge" style="padding: 1rem 4rem; font-size: 1.2rem; background-color: var(--secondary-color); color: white;">
+          <div v-else-if="userRole !== 'trekker'" class="badge badge-completed" style="padding: 1rem 4rem; font-size: 1.2rem;">
             Only Trekkers can book
           </div>
           <div v-else-if="trek.booking_status === 'completed'" class="badge badge-special" style="padding: 1rem 4rem; font-size: 1.2rem;">
             🏆 Trek Completed
           </div>
-          <div v-else-if="trek.booking_status === 'booked'" class="badge" style="padding: 1rem 4rem; font-size: 1.2rem; background-color: var(--secondary-color); color: white;">
+          <div v-else-if="trek.booking_status === 'booked'" class="badge badge-completed" style="padding: 1rem 4rem; font-size: 1.2rem;">
             BOOKED
           </div>
           <div v-else-if="trek.status === 'full'" class="badge" style="padding: 1rem 4rem; font-size: 1.2rem; background-color: #ef4444; color: white;">
@@ -84,7 +84,7 @@
             Book This Trek
           </button>
         </div>
-        
+      
       </div>
     </div>
   </div>

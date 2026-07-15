@@ -65,7 +65,7 @@
             <td>
               <span v-if="u.role === 2" class="badge badge-special">Admin</span>
               <span v-else-if="u.role === 1" class="badge badge-ongoing">Staff</span>
-              <span v-else class="badge badge-completed" style="background-color: var(--secondary-color); color: white;">Trekker</span>
+              <span v-else class="badge badge-completed">Trekker</span>
             </td>
             <td>{{ u.username }}</td>
             <td>{{ u.name }}</td>

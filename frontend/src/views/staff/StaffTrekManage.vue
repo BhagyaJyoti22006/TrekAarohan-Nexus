@@ -33,7 +33,7 @@
           <span class="badge badge-active" style="font-size: 1rem; padding: 0.5rem 1rem; background-color: var(--primary-color); color: white;">{{ capitalize(trek.difficulty) }} Difficulty</span>
           <span class="badge badge-open" style="font-size: 1rem; padding: 0.5rem 1rem;">📍 {{ trek.location }}</span>
           
-          <span v-if="['completed', 'cancelled'].includes(trek.status)" class="badge" style="font-size: 1rem; padding: 0.5rem 1rem; background-color: var(--secondary-color); color: white; border: 1px solid var(--secondary-color);">Concluded</span>
+          <span v-if="['completed', 'cancelled'].includes(trek.status)" class="badge badge-completed" style="font-size: 1rem; padding: 0.5rem 1rem;">Concluded</span>
           <span v-else class="badge badge-open" style="font-size: 1rem; padding: 0.5rem 1rem;">🧑‍🤝‍🧑 {{ trek.slots_available }} Slots Left</span>
           
           <span :class="['badge', `badge-${trek.status}`]" style="font-size: 1rem; padding: 0.5rem 1rem; margin-left: auto;">{{ capitalize(trek.status) }}</span>
