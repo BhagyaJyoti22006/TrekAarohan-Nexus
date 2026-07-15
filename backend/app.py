@@ -26,7 +26,7 @@ def create_app():
     # Celery Configurations
     app.config["CELERY_BROKER_URL"] = "redis://127.0.0.1:6379/0"
     app.config["CELERY_RESULT_BACKEND"] = "redis://127.0.0.1:6379/0"
-    app.config["CELERY_TIMEZONE"] = "UTC"
+    app.config["CELERY_TIMEZONE"] = "Asia/Kolkata"
     app.config["CELERY_IMPORTS"] = ["tasks"]
     
     # MailHog Configurations
@@ -57,13 +57,13 @@ def create_app():
     celery_app.conf.beat_schedule = {
         "daily-trek-reminders": {
             "task": "tasks.send_daily_reminders",
-            #"schedule": crontab(hour=8, minute=0), 
-            "schedule": crontab(minute="*"), 
+            "schedule": crontab(hour=8, minute=0), 
+            #"schedule": crontab(minute="*"), 
         },
         "monthly-admin-reports": {
             "task": "tasks.send_monthly_reports",
-            #"schedule": crontab(hour=6, minute=0, day_of_month="1"), 
-            "schedule": crontab(minute="*/2"),
+            "schedule": crontab(hour=6, minute=0, day_of_month="1"), 
+            #"schedule": crontab(minute="*/2"),
         }
     }
     

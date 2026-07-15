@@ -1,5 +1,0 @@
-Booking ID,Trek ID,Trek Name,Trek Status,Location,Start Date,End Date,Duration,Booking Date,Cancelled Date,Booking Status
-1,1,sdasd,full,sad,2026-07-10,2026-07-30,21,2026-07-15,,booked
-2,2,asd,ongoing,asd,2026-07-03,2026-07-17,15,2026-07-15,,booked
-3,4,sd,full,asd,2026-07-09,2026-07-24,16,2026-07-15,,booked
-4,3,asd,open,sd,2026-07-17,2026-07-24,8,2026-07-15,2026-07-15,cancelled
