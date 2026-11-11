@@ -7,7 +7,7 @@ public_bp = Blueprint("public", __name__)
 
 
 @public_bp.route("/treks", methods=["GET"])
-@cache.cached(timeout=60, query_string=True)
+@cache.cached(timeout=10, query_string=True)
 def get_all_open_treks():
     treks = Trek.query.filter_by(status="open").order_by(Trek.id.desc()).all()
     result = []
@@ -28,7 +28,7 @@ def get_all_open_treks():
 
 
 @public_bp.route("/treks/featured", methods=["GET"])
-@cache.cached(timeout=60, query_string=True)
+@cache.cached(timeout=10, query_string=True)
 def get_featured_treks():
     treks = Trek.query.filter_by(status="open").order_by(Trek.id.desc()).limit(3).all()
     result = []
@@ -76,7 +76,7 @@ def get_public_trek(trek_id):
             "staff_experience": staff.experience if staff else "",
             "staff_completed_treks": staff_completed_treks
         }
-        cache.set(cache_key, trek_data, timeout=60)
+        cache.set(cache_key, trek_data, timeout=10)
     
     booking_status = None
     current_user_id = get_jwt_identity()

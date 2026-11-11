@@ -21,7 +21,7 @@ def create_app():
     # Cache Configurations
     app.config["CACHE_TYPE"] = "RedisCache"
     app.config["CACHE_REDIS_URL"] = "redis://127.0.0.1:6379/0"
-    app.config["CACHE_DEFAULT_TIMEOUT"] = 60
+    app.config["CACHE_DEFAULT_TIMEOUT"] = 10
     
     # Celery Configurations
     app.config["CELERY_BROKER_URL"] = "redis://127.0.0.1:6379/0"

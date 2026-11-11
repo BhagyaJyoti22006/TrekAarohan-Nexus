@@ -193,7 +193,7 @@ export default {
   methods: {
     getCoverImageUrl(path) {
       if (path) {
-        return `${SERVER_URL}/static/uploads/${path}`
+        return `${SERVER_URL}${path}`
       }
       return `${SERVER_URL}/static/images/trek.jpg`
     },

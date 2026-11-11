@@ -58,7 +58,7 @@
                 <div style="padding: 1.5rem; display: flex; flex-direction: column; flex-grow: 1;">
                     <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.25rem;">
                         <h3 style="margin: 0; font-size: 1.35rem;">{{ t.name }}</h3>
-                        <span style="font-weight: bold; font-size: 1.2rem; color: var(--primary-color);">₹{{ t.price.toFixed(2) }}</span>
+                        <span style="font-weight: bold; font-size: 1.2rem; color: var(--primary-color);">₹{{ parseFloat(t.price).toFixed(2) }}</span>
                     </div>
                     
                     <p style="color: var(--secondary-color); font-size: 0.95rem; margin: 0 0 0.5rem 0;">📍 {{ t.location }}</p>
